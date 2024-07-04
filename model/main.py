@@ -5,6 +5,7 @@ import torchvision
 import torchvision.transforms as transforms
 import torch.nn as nn
 import torch.nn.functional as F
+from tqdm import tqdm
 import os
 
 import model
@@ -35,9 +36,33 @@ print(image.shape)
 plt.imshow(image.permute(1,2,0))
 plt.show()
 
+# Set up device for model
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+elif torch.backends.mps.is_available():
+    device = torch.device("mps")
+else:
+    device = torch.device("cpu")
+
 # create instance of model here
+model = get_model()
 
-# train model for x epoches here (and run testing)
 
-# run a random image through the model, output image, prediction, and label
+# train model for x epoches here (and run testing)model = 
+
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters())
+epochs = 2
+for epoch in range(1, epochs):  
+  train_one_epoch(model, train_loader, optimizer, criterion, device)
+  test(model, test_loader, )
+  pbar.update()
+
+with tqdm(range(epochs)) as pbar:
+    for epoch in pbar:
+        train_one_epoch(model, train_loader, optimizer, criterion, device)
+        test(model, test_loader, )
+        pbar.update()
+
+ge, prediction, and label
 
