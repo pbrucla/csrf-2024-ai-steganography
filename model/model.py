@@ -29,7 +29,7 @@ def unroll(model) -> None:
             break
 
 # Sets different learning rates for layers
-def set_different_learning_rates(model, base_lr, classifier_lr):
+def get_optimizer(model, base_lr, classifier_lr):
 
     parameters = [
         {'params': model.features.parameters(), 'lr': base_lr},
@@ -37,6 +37,5 @@ def set_different_learning_rates(model, base_lr, classifier_lr):
     ]
 
     # Initialize optimizer?
-    optimizer = torch.optim.SGD(params, momentum=0.9)
+    optimizer = torch.optim.SGD(parameters, momentum=0.9)
     return optimizer
-

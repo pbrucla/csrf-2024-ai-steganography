@@ -10,15 +10,15 @@ import torch.nn.functional as F
 def test_one_epoch(model, test_loader, device : str):
     #counters for both correct and total predictions
     correct = 0
-    sum = 0
+    total = 0
     with torch.no_grad(): #does not calculate gradients for performance optimization (does not store gradient graphs)
         model.eval() #puts into an evaluation state (drops droput layer and changes normalization layer)
-        for inputs, labels in test_loader:
-            inputs, labels = inputs.to(device), labels.to(device)
-            outputs = model(inputs)
-            predictions = outputs.argmax(axis=1)
-            correct += (predictions == labels).sum().item()
-            total += labels.size(0)
+        
+        for batch_inputs, batch_labels in test_loader:
+            batch_inputs, batch_labels = batch_inputs.to(device), batch_labels.to(device)
+            batch_outputs = model(inputs)
+            correct += (batch_outputs.round() == batch_labels).sum(dtype=torch.int).item()
+            total += len(batch_outputs)
     
     #calculate and print out accuracy
     accuracy = round(100 * correct / total, 3)

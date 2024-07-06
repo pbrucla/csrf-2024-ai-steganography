@@ -8,9 +8,9 @@ import torch.nn.functional as F
 from tqdm import tqdm
 import os
 
-import model
-import test
-import train
+from model import get_model, get_optimizer, freeze_model, unroll
+from test import test_one_epoch
+from train import train_one_epoch
 
 # create dataloaders here
 # https://pytorch.org/vision/stable/generated/torchvision.datasets.ImageFolder.html
@@ -44,25 +44,18 @@ elif torch.backends.mps.is_available():
 else:
     device = torch.device("cpu")
 
+LEARNING_RATE = 1e-4
+EPOCHS = 2
+
 # create instance of model here
 model = get_model()
-
+freeze_model(model)
+optimizer = get_optimizer(model, LEARNING_RATE, LEARNING_RATE/2)
+criterion = nn.BCELoss()
 
 # train model for x epoches here (and run testing)model = 
-
-criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters())
-epochs = 2
-for epoch in range(1, epochs):  
-  train_one_epoch(model, train_loader, optimizer, criterion, device)
-  test(model, test_loader, )
-  pbar.update()
-
-with tqdm(range(epochs)) as pbar:
+with tqdm(range(EPOCHS)) as pbar:
     for epoch in pbar:
         train_one_epoch(model, train_loader, optimizer, criterion, device)
-        test(model, test_loader, )
+        test_one_epoch(model, test_loader, device)
         pbar.update()
-
-ge, prediction, and label
-
