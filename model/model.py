@@ -14,11 +14,12 @@ def get_model() -> nn.Module:
     )
     return model
 
-def freeze_model(model: nn.Model) -> None:
+def freeze_model(model: nn.Module) -> None:
     for param in model.parameters():
         param.requires_grad = False
 
-    model.classifier.requires_grad = True
+    for param in model.classifier.parameters():
+        param.requires_grad = True
     
 
 # Unfreezes last layer of model with requires_grad = False
@@ -32,10 +33,10 @@ def unroll(model) -> None:
 def get_optimizer(model, base_lr, classifier_lr):
 
     parameters = [
-        {'params': model.features.parameters(), 'lr': base_lr},
+        # {'params': model.features.parameters(), 'lr': base_lr},
         {'params': model.classifier.parameters(), 'lr': classifier_lr}
     ]
 
     # Initialize optimizer?
-    optimizer = torch.optim.SGD(parameters, momentum=0.9)
+    optimizer = torch.optim.AdamW(parameters)
     return optimizer
