@@ -13,18 +13,67 @@ from test import test_one_epoch
 from train import train_one_epoch
 from stego_pvd import StegoPvd
 
+import argparse
+# import ModelTypes enum from model
+from model import ModelTypes
+
+from dataclasses import dataclass
+
+@dataclass
+class TrainingConfig:
+    epochs: int = 2
+    learning_rate: float = 0.001
+    optimizer: str = "adamw"
+    criterion: str = "bce_loss"
+    model_type: ModelTypes = ModelTypes.EfficientNet
+    device: str = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Train CNN")
+    parser.add_argument('--epochs', type=int, default=2, help='Number of epochs to train')
+    parser.add_argument('--learning-rate', type=float, default=0.001, help='Learning rate')
+    parser.add_argument('--model-type', type=int, default=ModelTypes.EfficientNet, help='Model type: EfficientNet(1) or ResNet(2)')
+    parser.add_argument('--criterion', type=str, default='bce_loss', help='Criterion type')
+    parser.add_argument('--device', type=str, default='cpu', help='Device type: cpu, cuda, or mps')
+
+    #Can you add an optimizer argument?
+    return parser.parse_args()
+
+def get_config():
+    args = parse_args()
+    return TrainingConfig(
+        epochs = args.epochs,
+        learning_rate = args.learning_rate,
+        optimizer = args.optimizer,
+        criterion = args.criterion,
+        model_type = args.model_type,
+        device = args.device
+    )
+
 
 if __name__ == "__main__":
     print("Starting Training")
     # create dataloaders here
     # https://pytorch.org/vision/stable/generated/torchvision.datasets.ImageFolder.html
     print("Creating datasets")
+
+    #throw in an image
     train_dataset = StegoPvd(filepath=os.path.join( "Stego-pvd-dataset", "train"))
     test_dataset = StegoPvd(filepath=os.path.join("Stego-pvd-dataset", "test"), clean_path="cleanTest", stego_path="stegoTest")
 
     print("Creating DataLoaders")
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=16, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=16, shuffle=True)
+    # it's throwing weird errors, not printing print (train_loader[0][0])
+    #checking image formatted correctly
+    for idx, (images, labels) in enumerate(train_loader):
+        print(images[0])  # Get the first image from the batch
+        check_image = images[0].transform()
+        print ("\n transformed image: ", check_image)
+        break 
+    
+    check_image = train_loader[1].transform()
+    print (check_image)
 
     # visualize a sample from the train loader
     # train_iter = iter(train_loader)

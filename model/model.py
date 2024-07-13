@@ -5,13 +5,29 @@ import torchvision
 import torch.nn as nn
 import torch.nn.functional as F
 
-def get_model() -> nn.Module:
-    model = torchvision.models.efficientnet_v2_s(weights="EfficientNet_V2_S_Weights.IMAGENET1K_V1")
-    model.classifier = nn.Sequential(
-        nn.Dropout(.2, inplace=True),
-        nn.Linear(in_features=1280, out_features=1),
-        nn.Sigmoid()
-    )
+from enum import Enum
+
+class ModelTypes(Enum):
+    EfficentNet = 1
+    ResNet = 2
+
+def get_model(model_type: ModelTypes) -> nn.Module:
+    match model_type:
+        case ModelTypes.EfficentNet:
+            model = torchvision.models.efficientnet_v2_s(weights="EfficientNet_V2_S_Weights.IMAGENET1K_V1")
+            model.classifier = nn.Sequential(
+                nn.Dropout(.2, inplace=True),
+                nn.Linear(in_features=1280, out_features=1),
+                nn.Sigmoid()
+            )
+
+        case ModelTypes.ResNet:
+            model = torchvision.models.resnet18(weights="ResNet18_Weights.IMAGENET1K_V1")
+            model.fc = nn.Sequential(
+                nn.Linear(in_features=512, out_features=1, bias=True),
+                nn.Sigmoid()
+            )
+
     return model
 
 def freeze_model(model: nn.Module) -> None:

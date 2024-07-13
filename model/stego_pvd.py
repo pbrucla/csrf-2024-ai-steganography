@@ -17,9 +17,9 @@ class StegoPvd(Dataset):
 
         self.transform = v2.Compose([
             v2.Resize((128, 128)),
-            v2.ToImage(),
-            v2.ToDtype(torch.float32, scale=True),
-            v2.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
+            v2.ToImagePIL(), #does not scale values
+            v2.ToDtype(torch.float32), #preserves origianl values, no normalize (scale=false default)
+            #v2.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
         ])
 
     #return length of dataset
@@ -30,9 +30,10 @@ class StegoPvd(Dataset):
         # open in PIL
         filepath = self.all_files[idx]
         # find filepath previosuly
-        image = Image.open(filepath).convert('RGB')
+        image = Image.open(filepath).convert('RGB') #directly convert to 32-bit float
+
         image = self.transform(image)
-        
+    
         #get label
         label = self.labels[idx]
 
