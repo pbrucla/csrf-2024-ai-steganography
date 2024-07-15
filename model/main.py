@@ -1,3 +1,4 @@
+import os
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,74 +7,89 @@ import torchvision.transforms as transforms
 import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
-import os
-
-from model import get_model, get_optimizer, freeze_model, unroll
-from test import test_one_epoch
-from train import train_one_epoch
-from stego_pvd import StegoPvd
-
 import argparse
+
+from model.dataset import Data
+from train import train_one_epoch
+from test import test_one_epoch
+from model import get_model, get_optimizer, freeze_model, unroll
 # import ModelTypes enum from model
 from model import ModelTypes
-
+# import DatasetTypes enum from config 
+from config import DatasetTypes
 from dataclasses import dataclass
 
 @dataclass
 class TrainingConfig:
     epochs: int = 2
     learning_rate: float = 0.001
-    optimizer: str = "adamw"
-    criterion: str = "bce_loss"
     model_type: ModelTypes = ModelTypes.EfficientNet
-    device: str = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+    device: str = 'default' #if default"cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+    transfer_learning: bool = True
+    extract_lsb: bool = False
+    dataset_types: DatasetTypes = DatasetTypes.PVD
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Train CNN")
     parser.add_argument('--epochs', type=int, default=2, help='Number of epochs to train')
     parser.add_argument('--learning-rate', type=float, default=0.001, help='Learning rate')
     parser.add_argument('--model-type', type=int, default=ModelTypes.EfficientNet, help='Model type: EfficientNet(1) or ResNet(2)')
-    parser.add_argument('--criterion', type=str, default='bce_loss', help='Criterion type')
-    parser.add_argument('--device', type=str, default='cpu', help='Device type: cpu, cuda, or mps')
-
-    #Can you add an optimizer argument?
+    parser.add_argument('--device', type=str, default='default', help='Device type: cpu, cuda, or mps')
+    parser.add_argument('--transfer-learning', action='store_true', help='Enable model unrolling and freezing')
+    parser.add_argument('--dataset-types', type=str, nargs='+', default=16, choices=[i.name for i in DatasetTypes], help='Dataset type: CLEAN(1), DTC(2), FFT(4), LSB(8), PVD(16), SSB4(32), SSBN(64)')
+    parser.add_argument('--extract-lsb', action='store_true', help='Enable masking bits for LSB')
+    
     return parser.parse_args()
+
+def get_device(device_argument):
+    #if default set automatically
+    if device_argument == 'default':
+        if torch.cuda.is_available:
+            return 'cuda'
+        elif torch.backends.mps.is_available():
+            return 'mps'
+        else:
+            return 'cpu'
+    #if argument is not default return user inputted device
+    return device_argument
 
 def get_config():
     args = parse_args()
+
     return TrainingConfig(
         epochs = args.epochs,
         learning_rate = args.learning_rate,
-        optimizer = args.optimizer,
-        criterion = args.criterion,
         model_type = args.model_type,
-        device = args.device
+        device = get_device(args.device), 
+        transfer_learning = args.transfer_learning,
+        dataset_types = args.dataset_types,
+        extract_lsb = args.extract_lsb
     )
+#since the datset argument takes in a list of strings, this is used to convert that list back to integers for processing later
+def enum_names_to_values(names):
+    values = []
+    for name in names:
+        member = DatasetTypes[name]
+        values.append(member.value)
+    return values
 
-
-if __name__ == "__main__":
+def train_model(config):    
     print("Starting Training")
-    # create dataloaders here
+
     # https://pytorch.org/vision/stable/generated/torchvision.datasets.ImageFolder.html
     print("Creating datasets")
-
-    #throw in an image
-    train_dataset = StegoPvd(filepath=os.path.join( "Stego-pvd-dataset", "train"))
-    test_dataset = StegoPvd(filepath=os.path.join("Stego-pvd-dataset", "test"), clean_path="cleanTest", stego_path="stegoTest")
+    converted_dataset_types = enum_names_to_values(config.dataset_types)
+    train_dataset = Data(filepath=os.path.join("data", "train"))
+    test_dataset = Data(config.extract_lsb, converted_dataset_types, filepath=os.path.join("data", "test")) #clean_path="cleanTest", dct_path="DCTTest", fft_path = "FFTTest", lsb_path = "LSBTest", pvd_path="PVDTest", ssb4_path = "SSB4Test", ssbn_path = "SSBNTest"
 
     print("Creating DataLoaders")
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=16, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=16, shuffle=True)
-    # it's throwing weird errors, not printing print (train_loader[0][0])
-    #checking image formatted correctly
-    for idx, (images, labels) in enumerate(train_loader):
-        print(images[0])  # Get the first image from the batch
-        check_image = images[0].transform()
-        print ("\n transformed image: ", check_image)
-        break 
-    
+ 
+    base_image = train_loader[1]
+    print ("prior image", base_image)
     check_image = train_loader[1].transform()
-    print (check_image)
+    print ("\n Changed image: ",check_image)
 
     # visualize a sample from the train loader
     # train_iter = iter(train_loader)
@@ -83,28 +99,22 @@ if __name__ == "__main__":
     # print(image.shape)
     # plt.imshow(image.permute(1,2,0))
     # plt.show()
-
-    # Set up device for model
-    if torch.cuda.is_available():
-        device = torch.device("cuda")
-    elif torch.backends.mps.is_available():
-        device = torch.device("mps")
-    else:
-        device = torch.device("cpu")
-
-    LEARNING_RATE = 1e-3
-    EPOCHS = 2
-
+    
     print("Creating model")
     # create instance of model here
-    model = get_model().to(device)
+    model = get_model().to(config.device)
     freeze_model(model)
-    optimizer = get_optimizer(model, LEARNING_RATE, LEARNING_RATE*2)
+    optimizer = get_optimizer(model, config.learning_rate, config.learning_rate*2)
     criterion = nn.BCELoss()
 
     # train model for x epoches here (and run testing)model = 
     print("Starting model")
-    for epoch in range(EPOCHS):
-        train_one_epoch(epoch, model, train_loader, optimizer, criterion, device)
-        # unroll(model)
-        test_one_epoch(model, test_loader, device)
+    for epoch in range(config.epochs):
+        train_one_epoch(epoch, model, train_loader, optimizer, criterion, config.device)
+        unroll(model, optimizer, config.learning_rate)
+        test_one_epoch(model, test_loader, config.device)
+
+
+if __name__ == "__main__":
+    config = get_config()
+    train_model(config)

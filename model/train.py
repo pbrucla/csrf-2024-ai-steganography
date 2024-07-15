@@ -6,7 +6,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
 
-# Write the train function here!
 def train_one_epoch(epoch, model, train_loader, optimizer, criterion, device: str) -> None:
     
     # Set model to training model

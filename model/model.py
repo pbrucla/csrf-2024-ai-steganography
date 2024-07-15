@@ -31,28 +31,39 @@ def get_model(model_type: ModelTypes) -> nn.Module:
     return model
 
 def freeze_model(model: nn.Module) -> None:
-    for param in model.parameters():
-        param.requires_grad = False
-
-    for param in model.classifier.parameters():
-        param.requires_grad = True
+    for n, param in enumerate(model.parameters):
+        if n == 0 or n == 1:
+            param.requires_grad = True
+        else:
+            param.requires_grad = False
     
 
 # Unfreezes last layer of model with requires_grad = False
-def unroll(model) -> None:
+def unroll(model, optimizer, lr) -> None:
     for param in reversed(list(model.parameters())):
         if not param.requires_grad:
             param.requires_grad = True
+            optimizer.param_groups.append({"params": param, "lr": lr})
             break
 
 # Sets different learning rates for layers
 def get_optimizer(model, base_lr, classifier_lr):
 
-    parameters = [
-        # {'params': model.features.parameters(), 'lr': base_lr},
-        {'params': model.classifier.parameters(), 'lr': classifier_lr}
-    ]
+    classifier_params = []
+    other_params = []
+    for n, param in enumerate(model.parameters()):
+        if param.requires_grad:
+            if n == 0 or n == 1:
+                classifier_params.append(param)
+            else:
+                other_params.append(param)
+
+    parameter_lrs = []
+    if classifier_params:
+        parameter_lrs.append({'params': classifier_params, 'lr': classifier_lr})
+    if other_params:
+        parameter_lrs.append({'params': other_params, 'lr': base_lr})
 
     # Initialize optimizer?
-    optimizer = torch.optim.AdamW(parameters)
+    optimizer = torch.optim.AdamW(parameter_lrs)
     return optimizer
