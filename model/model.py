@@ -8,12 +8,12 @@ import torch.nn.functional as F
 from enum import Enum
 
 class ModelTypes(Enum):
-    EfficentNet = 1
+    EfficientNet = 1
     ResNet = 2
 
 def get_model(model_type: ModelTypes) -> nn.Module:
     match model_type:
-        case ModelTypes.EfficentNet:
+        case ModelTypes.EfficientNet:
             model = torchvision.models.efficientnet_v2_s(weights="EfficientNet_V2_S_Weights.IMAGENET1K_V1")
             model.classifier = nn.Sequential(
                 nn.Dropout(.2, inplace=True),
@@ -31,7 +31,7 @@ def get_model(model_type: ModelTypes) -> nn.Module:
     return model
 
 def freeze_model(model: nn.Module) -> None:
-    for n, param in enumerate(model.parameters):
+    for n, param in enumerate(model.parameters()):
         if n == 0 or n == 1:
             param.requires_grad = True
         else:
@@ -43,17 +43,19 @@ def unroll(model, optimizer, lr) -> None:
     for param in reversed(list(model.parameters())):
         if not param.requires_grad:
             param.requires_grad = True
-            optimizer.param_groups.append({"params": param, "lr": lr})
+            default_group = optimizer.param_groups[0].copy()
+            default_group.update({"params": param, "lr": lr})
+            optimizer.add_param_group(default_group)
             break
 
 # Sets different learning rates for layers
-def get_optimizer(model, base_lr, classifier_lr):
+def get_optimizer(model, base_lr, classifier_lr, unfrozen_layers = [0,1,2,3]):
 
     classifier_params = []
     other_params = []
     for n, param in enumerate(model.parameters()):
         if param.requires_grad:
-            if n == 0 or n == 1:
+            if n in unfrozen_layers:
                 classifier_params.append(param)
             else:
                 other_params.append(param)

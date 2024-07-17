@@ -32,6 +32,11 @@ class resize_images(object):
         return self.__class__.__name__ + '(target_size={})'.format(self.target_size)
     
 
+class extract_lsb_transform(object):
+    def __call__(self, tensor):
+        return tensor & 1
+    def __repr__(self):
+        return self.__class__.__name__
     
 # make a class: Dataloader
 class Data(Dataset):
@@ -43,7 +48,7 @@ class Data(Dataset):
         user_options = 0
         for type in dataset_types:
             user_options |= type
-        
+
         clean_filepaths = []
         stego_filepaths = []
 
@@ -64,10 +69,12 @@ class Data(Dataset):
 
         self.all_files = clean_filepaths + stego_filepaths
         self.labels = [0] * len(clean_filepaths) + [1] * len(stego_filepaths)
+        self.labels = torch.tensor(self.labels, dtype=torch.float32)
 
         self.transform = v2.Compose([
             resize_images((128, 128)),
-            v2.ToTensor(), #does not scale values
+            v2.ToImage(), #does not scale values
+            extract_lsb_transform() if self.extract_lsb else lambda x: x,
             v2.ToDtype(torch.float32), #preserves original values, no normalize (scale=false default)
             #v2.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
         ])
@@ -80,12 +87,9 @@ class Data(Dataset):
         # open in PIL
         filepath = self.all_files[idx]
         # find filepath previosuly
-        image = Image.open(filepath) #directly convert to 32-bit float
+        image = Image.open(filepath).convert("RGB") #directly convert to 32-bit float
 
         image = self.transform(image)
-
-        if self.extract_lsb:
-            image = image & 1
     
         #get label
         label = self.labels[idx]
