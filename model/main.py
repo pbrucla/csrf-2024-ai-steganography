@@ -27,6 +27,7 @@ class TrainingConfig:
     device: str = 'default' #if default"cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
     transfer_learning: bool = True
     extract_lsb: bool = False
+    batch_size: int = 256
     dataset_types: tuple[str, ...] = ("CLEAN", "LSB")
 
 def parse_args():
@@ -38,6 +39,7 @@ def parse_args():
     parser.add_argument('--transfer-learning', action='store_true', help='Enable model unrolling and freezing')
     parser.add_argument('--dataset-types', type=str, nargs='+', default=("CLEAN", "LSB"), choices=[i.name for i in DatasetTypes], help='Dataset type: CLEAN(1), DTC(2), FFT(4), LSB(8), PVD(16), SSB4(32), SSBN(64)')
     parser.add_argument('-el', '--extract-lsb', action='store_true', help='Enable masking bits for LSB')
+    parser.add_argument('--batch-size', type=int, default=256)
     
     return parser.parse_args()
 
@@ -62,9 +64,11 @@ def get_config():
         model_type = args.model_type,
         device = get_device(args.device), 
         transfer_learning = args.transfer_learning,
+        extract_lsb = args.extract_lsb,
+        batch_size = args.batch_size,
         dataset_types = args.dataset_types,
-        extract_lsb = args.extract_lsb
     )
+
 #since the datset argument takes in a list of strings, this is used to convert that list back to integers for processing later
 def enum_names_to_values(names):
     values = []
@@ -80,11 +84,11 @@ def train_model(config):
     print("Creating datasets")
     converted_dataset_types = enum_names_to_values(config.dataset_types)
     train_dataset = Data(config.extract_lsb, converted_dataset_types, filepath=os.path.join("data", "train"))
-    test_dataset = Data(config.extract_lsb, converted_dataset_types, filepath=os.path.join("data", "test"), clean_path="cleanTest", lsb_path="lsbTest") #clean_path="cleanTest", dct_path="DCTTest", fft_path = "FFTTest", lsb_path = "LSBTest", pvd_path="PVDTest", ssb4_path = "SSB4Test", ssbn_path = "SSBNTest"
+    test_dataset = Data(config.extract_lsb, converted_dataset_types, filepath=os.path.join("data", "test"), clean_path="cleanTest", lsb_path="LSBTest") #clean_path="cleanTest", dct_path="DCTTest", fft_path = "FFTTest", lsb_path = "LSBTest", pvd_path="PVDTest", ssb4_path = "SSB4Test", ssbn_path = "SSBNTest"
 
     print("Creating DataLoaders")
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=16, shuffle=True)
-    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=16, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
+    test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=config.batch_size, shuffle=True)
  
     # base_image = train_loader[1]
     # print ("prior image", base_image)

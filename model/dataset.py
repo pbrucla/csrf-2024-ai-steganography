@@ -54,17 +54,17 @@ class Data(Dataset):
 
         if user_options & DatasetTypes.CLEAN:
             clean_filepaths.extend([os.path.join(filepath, clean_path, file) for file in os.listdir(path=os.path.join(filepath, clean_path))])
-        elif user_options & DatasetTypes.DCT:
+        if user_options & DatasetTypes.DCT:
             stego_filepaths.extend([os.path.join(filepath, dct_path, file) for file in os.listdir(path=os.path.join(filepath, dct_path))])
-        elif user_options & DatasetTypes.FFT:
+        if user_options & DatasetTypes.FFT:
             stego_filepaths.extend([os.path.join(filepath, fft_path, file) for file in os.listdir(path=os.path.join(filepath, fft_path))])
-        elif user_options & DatasetTypes.LSB:
+        if user_options & DatasetTypes.LSB:
             stego_filepaths.extend([os.path.join(filepath, lsb_path, file) for file in os.listdir(path=os.path.join(filepath, lsb_path))])
-        elif user_options & DatasetTypes.PVD:
+        if user_options & DatasetTypes.PVD:
             stego_filepaths.extend([os.path.join(filepath, pvd_path, file) for file in os.listdir(path=os.path.join(filepath, pvd_path))])
-        elif user_options & DatasetTypes.SSB4:
+        if user_options & DatasetTypes.SSB4:
             stego_filepaths.extend([os.path.join(filepath, ssb4_path, file) for file in os.listdir(path=os.path.join(filepath, ssb4_path))])
-        elif user_options & DatasetTypes.SSBN:
+        if user_options & DatasetTypes.SSBN:
             stego_filepaths.extend([os.path.join(filepath, ssbn_path, file) for file in os.listdir(path=os.path.join(filepath, ssbn_path))])
 
         self.all_files = clean_filepaths + stego_filepaths
