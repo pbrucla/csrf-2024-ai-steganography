@@ -2,6 +2,7 @@
 Visualization_Outputs/
 wandb/
 Datasets/cache/
+temp/
 
 # wp
 *.swp

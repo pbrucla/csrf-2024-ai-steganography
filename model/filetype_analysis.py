@@ -3,6 +3,7 @@ from collections import defaultdict
 import os
 import numpy as np
 from pathlib import Path
+import matplotlib.pyplot as plt
 
 def get_image_info(image_path, filetype_dictionary, mode_dictionary, size_dictionary):
     if Path(image_path).suffix.lower() == ".txt":
@@ -22,7 +23,7 @@ def print_dictionary(dict: dict[str, int], root_str : str) -> None:
         print(key, ": ", val, end='   ')
     print('\n')
 
-def print_rgba_values(image_path):
+def print_rgba_values(image_path: str): # Probably change to show more clearly
     with Image.open(image_path) as img:
         if (img.mode == 'RGBA'):
             red = img.getchannel('R')
@@ -33,24 +34,56 @@ def print_rgba_values(image_path):
                 for x in range(alpha.width):
                     print(f"({red.getpixel((x, y))}, {green.getpixel((x, y))}, {blue.getpixel((x, y))}, {alpha.getpixel((x, y))})", end=' ')
                     print()
+                
+def print_dimensions_bar_chart(dimensions_dictionary: dict, dataset_name: str):
+    widths = [dimensions[0] for dimensions in dimensions_dictionary.keys()]
+    heights = [dimensions[1] for dimensions in dimensions_dictionary.keys()]
+    weights = list(dimensions_dictionary.values())
 
-def get_file_info(datasets: dict, get_filetypes=True, get_modes=True, get_dimensions=True):
-    for name, filepaths in datasets.items():
-        filetypes = defaultdict(int)
-        modes = defaultdict(int)
-        dimensions = defaultdict(int)
-        for filepath in filepaths:
-            get_image_info(filepath, filetypes, modes, dimensions)
-        sorted_dimensions = dict(sorted(dimensions.items(), key=lambda item : min(item[0])))
+    print(f'width_dist len: {len(widths)}')
+    print(f'height_dist len: {len(heights)}')
 
-        print(f"{name} total number of files: {sum(filetypes.values())}")
-        if get_filetypes:
-            print_dictionary(filetypes, root_str=name + " filetypes: ")
-        if get_modes:
-            print_dictionary(modes, root_str=name + " modes: ")
-        if get_dimensions:
-            print_dictionary(sorted_dimensions, root_str=name + " sizes: ")
-        print('\n')
+    if len(widths) != len(heights) or len(widths) != len(weights):
+        print(f'''ERROR: Couldn\'t print scatterplot {dataset_name} due to dimension mismatch.
+              dist1 size: {len(widths)}
+              dist2 size: {len(heights)}
+              weights size: {len(weights)}''')
+        return
+    
+    z = np.zeros_like(widths)
+    dx = dy = np.ones_like(widths) * 3
+    weights_log = np.log(weights)
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    ax.bar3d(widths, heights, z, dx, dy, weights_log, color='b')
+    ax.set_xlabel('Width')
+    ax.set_ylabel('Height')
+    ax.set_zlabel('Log(occurences)')
+    ax.set_title('Log of Number of Occurences of Image Dimensions')
+    plt.draw()
+    plt.savefig(os.path.join('temp', 'plot.png'), dpi=300, bbox_inches='tight')
+    plt.close(fig)
+
+def get_dataset_info(name: str, filepaths: str, print_filetypes=True, print_modes=True, print_dimensions=True):
+    filetypes = defaultdict(int)
+    modes = defaultdict(int)
+    dimensions = defaultdict(int)
+    for filepath in filepaths:
+        get_image_info(filepath, filetypes, modes, dimensions)
+    sorted_dimensions = dict(sorted(dimensions.items(), key=lambda item : min(item[0])))
+
+    print(f"{name} total number of files: {sum(filetypes.values())}")
+    if print_filetypes:
+        print_dictionary(filetypes, root_str=name + " filetypes: ")
+    if print_modes:
+        print_dictionary(modes, root_str=name + " modes: ")
+    if print_dimensions:
+        print_dictionary(sorted_dimensions, root_str=name + " sizes: ")
+    print('\n')
+
+    return filetypes, modes, sorted_dimensions
 
 def main():
     train_filepath=os.path.join( "data", "train")
@@ -72,9 +105,11 @@ def main():
         "Test PVD": test_pvd_filepaths
     }
 
-    get_file_info(datasets, get_dimensions=False, get_filetypes=False, get_modes=False)
+    filetypes, modes, dimensions = get_dataset_info(name="Train clean", filepaths=train_clean_filepaths, print_dimensions=False, print_filetypes=False, print_modes=False)
 
     # print_rgba_values(train_clean_filepaths[0])
+    print_dimensions_bar_chart(dimensions_dictionary=dimensions, dataset_name="Train clean")
+    # print_dictionary(dimensions, root_str='Train clean dimensions: ')
     
     
     

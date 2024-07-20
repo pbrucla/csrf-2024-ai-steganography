@@ -1,4 +1,4 @@
-from enum import IntEnum
+from enum_utils import IntEnum
 
 #Enum to differentiate which dataset to use
 class DatasetTypes(IntEnum):

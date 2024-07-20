@@ -6,6 +6,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
 
+from dataset import accuracy_metric
+
 def train_one_epoch(epoch, model, train_loader, optimizer, criterion, device: str) -> None:
     
     # Set model to training model
@@ -25,8 +27,7 @@ def train_one_epoch(epoch, model, train_loader, optimizer, criterion, device: st
             batch_outputs = model(batch_images).squeeze()
 
             # Calculate accuracy statistics batch_out
-            correct += (batch_outputs.round() == batch_labels).sum(dtype=torch.int).item()
-            total += len(batch_outputs)
+            correct, total += accuracy_metric(batch_outputs, batch_labels)
 
             # Calculate loss and do backpropagation
             loss = criterion(batch_outputs, batch_labels)

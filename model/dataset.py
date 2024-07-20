@@ -8,10 +8,25 @@ import numpy as np
 
 from config import DatasetTypes
 
+def accuracy_metric(predictions, labels):
+    predicted_classes = torch.argmax(predictions, dim=-1)
+    correct_predictions = (predicted_classes == labels).sum().item()
+    
+    return correct_predictions, labels.size(0)
+
+#returns a list of class accuracies
+def equal_accuracy_metric(predictions, labels): 
+    accuracy_list = []
+    for dataset in datsets:
+        accuracy_list.append(accuracy_metric(dataset.predictions, dataset.labels))
+    return accuracy_list
+
+        
+ 
 class resize_images(object):
     def __init__(self, target_size=(128,128)):
         self.target_size = target_size
-
+        
     def __call__(self, img):
         """
         :param img: (PIL): Image 
@@ -41,34 +56,39 @@ class extract_lsb_transform(object):
 # make a class: Dataloader
 class Data(Dataset):
     # filepath is the root path for StegoPvd Dataset
-    def __init__(self, extract_lsb, dataset_types, filepath, clean_path="cleanTrain", dct_path="DCTTrain", fft_path = "FFTTrain", lsb_path = "LSBTrain", pvd_path="PVDTrain", ssb4_path = "SSB4Train", ssbn_path = "SSBNTrain"): 
+    def __init__(self, extract_lsb, dataset_types: list[int], filepath, mode): 
         
+        assert mode in ["val", "test", "train"], f"{mode} is not a valid dataset mode"
+
         self.extract_lsb = extract_lsb
         
-        user_options = 0
+        # moving optional parameters to map
+        path_to_folder = {
+            DatasetTypes.CLEAN: "clean",
+            DatasetTypes.DCT: "DCT",
+            DatasetTypes.FFT: "FFT",
+            DatasetTypes.LSB: "LSB",
+            DatasetTypes.PVD: "PVD",
+            DatasetTypes.SSB4: "SSB4",
+            DatasetTypes.SSBN: "SSBN"
+        }
+
+        filepaths = [] 
+        self.class_labels = []
+    
+        #file path identification/appendage, filepath contains 7 lists for each set
         for type in dataset_types:
-            user_options |= type
-
-        clean_filepaths = []
-        stego_filepaths = []
-
-        if user_options & DatasetTypes.CLEAN:
-            clean_filepaths.extend([os.path.join(filepath, clean_path, file) for file in os.listdir(path=os.path.join(filepath, clean_path))])
-        if user_options & DatasetTypes.DCT:
-            stego_filepaths.extend([os.path.join(filepath, dct_path, file) for file in os.listdir(path=os.path.join(filepath, dct_path))])
-        if user_options & DatasetTypes.FFT:
-            stego_filepaths.extend([os.path.join(filepath, fft_path, file) for file in os.listdir(path=os.path.join(filepath, fft_path))])
-        if user_options & DatasetTypes.LSB:
-            stego_filepaths.extend([os.path.join(filepath, lsb_path, file) for file in os.listdir(path=os.path.join(filepath, lsb_path))])
-        if user_options & DatasetTypes.PVD:
-            stego_filepaths.extend([os.path.join(filepath, pvd_path, file) for file in os.listdir(path=os.path.join(filepath, pvd_path))])
-        if user_options & DatasetTypes.SSB4:
-            stego_filepaths.extend([os.path.join(filepath, ssb4_path, file) for file in os.listdir(path=os.path.join(filepath, ssb4_path))])
-        if user_options & DatasetTypes.SSBN:
-            stego_filepaths.extend([os.path.join(filepath, ssbn_path, file) for file in os.listdir(path=os.path.join(filepath, ssbn_path))])
-
-        self.all_files = clean_filepaths + stego_filepaths
-        self.labels = [0] * len(clean_filepaths) + [1] * len(stego_filepaths)
+            self.class_labels.append(path_to_folder[type]) #put all in labels
+            folder = path_to_folder.get(type) + mode.capitalize()
+            filepaths.append([os.path.join(filepath, folder, file) for file in os.listdir(path=os.path.join(filepath, folder))])
+               
+        self.all_files = []
+        self.dataset_sizes = []
+        for n, path in enumerate(filepaths):
+            self.all_files.extend(path)
+            self.labels.extend([n] * len(path)) 
+            self.dataset_sizes.append(len(path))
+        
         self.labels = torch.tensor(self.labels, dtype=torch.float32)
 
         self.transform = v2.Compose([
