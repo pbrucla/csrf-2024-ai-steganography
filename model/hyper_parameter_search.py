@@ -10,7 +10,6 @@ from model import get_model, get_optimizer, freeze_model, unroll
 from enum import enum_names_to_values
 from main import TrainingConfig
 
-
 # def get_efficient_hyperparameters(X_train, Y_train):
 
 param_grid = {
@@ -22,8 +21,6 @@ param_grid = {
 # define model here
 model = get_model(TrainingConfig.model_type, len(TrainingConfig.dataset_types)).to(TrainingConfig.device)
 # wrap the model in Keras????? (using Keras)
-
-# define dataset here (use validation data, that's what it is made for!!)
 
 clf = GridSearchCV(model, param_grid, cv=5, scoring="accuracy")
 

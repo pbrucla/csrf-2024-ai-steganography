@@ -90,7 +90,7 @@ def get_config():
         gamma = args.gamma
     )
 
-def train_model(config):    
+def train_model(config, plot_data=False):    
     print("Starting Training")
 
     # https://pytorch.org/vision/stable/generated/torchvision.datasets.ImageFolder.html
@@ -102,7 +102,7 @@ def train_model(config):
     print("Creating DataLoaders")
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=config.batch_size, shuffle=True)
- 
+    
     # base_image = train_loader[1]
     # print ("prior image", base_image)
     # check_image = train_loader[1].transform()
@@ -116,7 +116,6 @@ def train_model(config):
     # print(image.shape)
     # plt.imshow(image.permute(1,2,0))
     # plt.show()
-    
     print("Creating model")
     # create instance of model here
     model = get_model(config.model_type, len(config.dataset_types)).to(config.device)
@@ -127,12 +126,36 @@ def train_model(config):
 
     # train model for x epoches here (and run testing)model = 
     print("Starting model")
+    data_storage = []
+    loss_values = []
+    accu_values = []
+    epoch_array = []
+
     for epoch in range(config.epochs):
-        train_one_epoch(epoch, model, train_loader, optimizer, criterion, config.device)
+        data_storage[epoch] = train_one_epoch(epoch, model, train_loader, optimizer, criterion, config.device)
         unroll(model, optimizer, config.learning_rate)
         test_one_epoch(model, test_loader, config.device)
         scheduler.step()
-    
+        loss_values[epoch] = data_storage[epoch][0]
+        accu_values[epoch] = data_storage[epoch][1]
+        epoch_array[epoch] = epoch
+   
+
+    if plot_data:
+        #showing overall data trends for performance
+        plt.subplot(2,1,1)
+        plt.plot(epoch_array, loss_values, label = "Loss over the Epochs", color = "orange")
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        
+        plt.subplot(2,1,2)
+        plt.plot(epoch_array, accu_values, label = "Accuracy over the Epochs", color = "green")
+        plt.xlabel("Epoch")
+        plt.ylabel("Accuracy")
+
+        plt.show()
+
+    return accu_values
 
 if __name__ == "__main__":
     config = get_config()

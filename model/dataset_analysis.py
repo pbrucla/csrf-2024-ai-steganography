@@ -23,28 +23,46 @@ def clean_pvd_diff():
 
     # train_stego_filepaths = dct_filepaths + fft_filepaths + lsb_filepaths + pvd_filepaths + ssb4_filepaths + ssbn_filepaths
 
-    num = 1
+    num = 10
 
     # skip the image named 0.jpg in cleanTrain
     train_clean_filepaths = sorted(train_clean_filepaths)[1:num+1]
     pvd_filepaths = sorted(pvd_filepaths)[:num]
 
-    # np.set_printoptions(threshold=np.inf)
-
     pvd_diffs = []
+    avg_pvd_diffs = []
+    max_pvd_diffs = []
+
     for clean, pvd in zip(train_clean_filepaths, pvd_filepaths):
         clean_image = Image.open(clean)
         pvd_image = Image.open(pvd)
 
-        diff = np.abs(np.array(clean_image)[:, :, :-1] - np.array(pvd_image))
-        # diff = np.abs(np.concatenate((np.array(pvd_image), np.zeros((512, 512, 1))), axis=2) - np.array(clean_image))
-        pvd_diffs.append(diff)
+        pvd_diff = np.abs(np.array(clean_image)[:, :, :-1] - np.array(pvd_image))
+        # pvd_diff = pvd_diff[pvd_diff != 255]
+        pvd_diffs.append(pvd_diff)
 
-        # pvd_diffs.append(np.max(np.array(clean_image)[:, :, :-1] - np.array(pvd_image)))
+        avg_pvd_diff = np.mean(pvd_diff)
+        avg_pvd_diffs.append(avg_pvd_diff)
 
-    return pvd_diffs
+        max_pvd_diff = np.max(pvd_diff)
+        max_pvd_diffs.append(max_pvd_diff)
+
+    # rgb = ["Red", "Green", "Blue"]
+
+    # for i, row in enumerate(pvd_diff):
+    #     for j, col in enumerate(row):
+    #         for k, channel in enumerate(col):
+    #             if channel == 0 or channel == 255:
+    #                 continue
+    #             print(f"Row: {i}, Column: {j}, {rgb[k]}: {channel}")
+
+    return pvd_diffs, avg_pvd_diffs, max_pvd_diffs
+
+def main():
+    all_diffs = clean_pvd_diff()
+    for avg, max in zip(all_diffs[1], all_diffs[2]):
+        print(f"Average pixel difference: {avg}")
+        print(f"Max pixel difference: {max}")
 
 if __name__ == "__main__":
-    print(len(clean_pvd_diff()))
-    # clean_pvd_diff()
-    # print(np.max(clean_pvd_diff()))  
+    main()

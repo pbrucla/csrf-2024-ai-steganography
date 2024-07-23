@@ -1,6 +1,6 @@
 from PIL import Image
 from collections import defaultdict
-import os
+import os   
 import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
@@ -9,6 +9,8 @@ def get_image_info(image_path, filetype_dictionary, mode_dictionary, size_dictio
     if Path(image_path).suffix.lower() == ".txt":
         print(f"\nBad filepath: {image_path}\n")
         return
+    if os.path.isdir(os.path.join(image_path)):
+            return
     with Image.open(image_path) as img:
         filetype = img.format
         filetype_dictionary[filetype] += 1
@@ -21,7 +23,7 @@ def print_dictionary(dict: dict[str, int], root_str : str) -> None:
     print(root_str, end=' ')
     for key, val in dict.items():
         print(key, ": ", val, end='   ')
-    print('\n')
+    print()
 
 def print_rgba_values(image_path: str): # Probably change to show more clearly
     with Image.open(image_path) as img:
@@ -63,7 +65,9 @@ def print_dimensions_bar_chart(dimensions_dictionary: dict, dataset_name: str):
     ax.set_zlabel('Log(occurences)')
     ax.set_title('Log of Number of Occurences of Image Dimensions')
     plt.draw()
-    plt.savefig(os.path.join('temp', 'plot.png'), dpi=300, bbox_inches='tight')
+    filepath = os.path.join('temp', 'plot.png')
+    print(f'Saving plot to {filepath}')
+    plt.savefig('train_clean_plot.png')
     plt.close(fig)
 
 def get_dataset_info(name: str, filepaths: str, print_filetypes=True, print_modes=True, print_dimensions=True):
@@ -81,34 +85,61 @@ def get_dataset_info(name: str, filepaths: str, print_filetypes=True, print_mode
         print_dictionary(modes, root_str=name + " modes: ")
     if print_dimensions:
         print_dictionary(sorted_dimensions, root_str=name + " sizes: ")
-    print('\n')
+    print()
 
     return filetypes, modes, sorted_dimensions
 
-def main():
-    train_filepath=os.path.join( "data", "train")
-    test_filepath =os.path.join("data", "test")
+def get_filepaths(base_filepath, folder):
+    return [os.path.join(base_filepath, folder, file) for file in os.listdir(path=os.path.join(base_filepath, folder))]
 
-    train_clean_filepaths = [os.path.join(train_filepath, "cleanTrain", file) for file in os.listdir(path=os.path.join(train_filepath, "cleanTrain"))]
-    test_clean_filepaths = [os.path.join(test_filepath, "cleanTest", file) for file in os.listdir(path=os.path.join(test_filepath, "cleanTest"))]
-    train_lsb_filepaths = [os.path.join(train_filepath, "LSBTrain", file) for file in os.listdir(path=os.path.join(train_filepath, "LSBTrain"))]
-    test_lsb_filepaths = [os.path.join(test_filepath, "LSBTest", file) for file in os.listdir(path=os.path.join(test_filepath, "LSBTest"))]
-    train_pvd_filepaths = [os.path.join(train_filepath, "PVDTrain", file) for file in os.listdir(path=os.path.join(train_filepath, "PVDTrain"))]
-    test_pvd_filepaths = [os.path.join(test_filepath, "PVDTest", file) for file in os.listdir(path=os.path.join(test_filepath, "PVDTest"))]
+
+def main():
+    train_filepath = os.path.join("data", "train")
+    test_filepath = os.path.join("data", "test")
+
+    train_clean_filepaths = get_filepaths(train_filepath, "cleanTrain")
+    test_clean_filepaths = get_filepaths(test_filepath, "cleanTest")
+    train_lsb_filepaths = get_filepaths(train_filepath, "LSBTrain")
+    test_lsb_filepaths = get_filepaths(test_filepath, "LSBTest")
+    train_pvd_filepaths = get_filepaths(train_filepath, "PVDTrain")
+    test_pvd_filepaths = get_filepaths(test_filepath, "PVDTest")
+    train_dct_filepaths = get_filepaths(train_filepath, "DCTTrain")
+    test_dct_filepaths = get_filepaths(test_filepath, "DCTTest")
+    train_fft_filepaths = get_filepaths(train_filepath, "FFTTrain")
+    test_fft_filepaths = get_filepaths(test_filepath, "FFTTest")
+    train_ssb4_filepaths = get_filepaths(train_filepath, "SSB4Train")
+    test_ssb4_filepaths = get_filepaths(test_filepath, "SSB4Test")
+    train_ssbn_filepaths = get_filepaths(train_filepath, "SSBNTrain")
+    test_ssbn_filepaths = get_filepaths(test_filepath, "SSBNTest")
 
     datasets = {
         "Train clean": train_clean_filepaths,
-        "Train LSB": train_lsb_filepaths,
-        "Train PVD": train_pvd_filepaths,
         "Test clean": test_clean_filepaths,
+        "Train LSB": train_lsb_filepaths,
         "Test LSB": test_lsb_filepaths,
-        "Test PVD": test_pvd_filepaths
+        "Train PVD": train_pvd_filepaths,
+        "Test PVD": test_pvd_filepaths,
+        "Train DCT": train_dct_filepaths,
+        "Test DCT": test_dct_filepaths,
+        "Train FFT": train_fft_filepaths,
+        "Test FFT": test_fft_filepaths,
+        "Train SSB4": train_ssb4_filepaths,
+        "Test SSB4": test_ssb4_filepaths,
+        "Train SSBN": train_ssbn_filepaths,
+        "Test SSBN": test_ssbn_filepaths
     }
 
-    filetypes, modes, dimensions = get_dataset_info(name="Train clean", filepaths=train_clean_filepaths, print_dimensions=False, print_filetypes=False, print_modes=False)
+    get_dataset_info(name="nonrgb train", filepaths=get_filepaths(os.path.join('data', 'train', 'cleanTrain'), folder='nonrgb'), print_dimensions=False)
+    get_dataset_info(name="nonrgb test", filepaths=get_filepaths(os.path.join('data', 'train', 'cleanTest'), folder='nonrgb'), print_dimensions=False)
+
+    # for name, filepaths in datasets.items():
+    #     get_dataset_info(name=name, filepaths=filepaths, print_dimensions=False, print_filetypes=True, print_modes=True)
+    
+    # filetypes, modes, dimensions = get_dataset_info(name="Train clean", filepaths=train_clean_filepaths, print_dimensions=False, print_filetypes=True, print_modes=True)
+    # filetypes, modes, dimensions = get_dataset_info(name="Test clean", filepaths=test_clean_filepaths, print_dimensions=False, print_filetypes=True, print_modes=True)
 
     # print_rgba_values(train_clean_filepaths[0])
-    print_dimensions_bar_chart(dimensions_dictionary=dimensions, dataset_name="Train clean")
+    # print_dimensions_bar_chart(dimensions_dictionary=dimensions, dataset_name="Train clean")
     # print_dictionary(dimensions, root_str='Train clean dimensions: ')
     
     

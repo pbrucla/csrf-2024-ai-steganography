@@ -43,3 +43,5 @@ def train_one_epoch(epoch, model, train_loader, optimizer, criterion, device: st
     print(f'Training loss:  {round(loss.item(), 3)}')
     accuracy = round(100 * correct / total, 3)
     print(f'Training accuracy: {accuracy}%')
+    data_baggage = [round(loss.item(), 3), accuracy]
+    return data_baggage
