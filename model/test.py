@@ -5,12 +5,13 @@ import torchvision
 import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
+from sklearn.metrics import f1_score
 
 from dataset import accuracy_metric
 
 # Write the test function here!
 
-def test_one_epoch(model, test_loader, device : str):
+def test_one_epoch(model, test_loader, device : str, class_labels):
     #counters for both correct and total predictions
     correct = 0
     total = 0
@@ -22,9 +23,16 @@ def test_one_epoch(model, test_loader, device : str):
                 batch_inputs, batch_labels = batch_inputs.to(device), batch_labels.to(device)
                 batch_outputs = F.sigmoid((batch_inputs)).squeeze()
 
-                correct, total += accuracy_metric(batch_outputs, batch_labels)
+                predicted_classes = torch.argmax(batch_outputs, axis=1)
+                new_correct, new_total = accuracy_metric(predicted_classes, batch_labels)
+                correct += new_correct
+                total += new_total
+                f1_scores = f1_score(batch_labels, predicted_classes, average=None)
 
-                pbar.set_postfix({"acc": f"{round(100 * correct / total, 3):.2f}%"})
+                status = {"acc": f"{round(100 * correct / total, 3):.2f}%"}
+                for class_label, f1 in zip(class_labels, f1_scores):
+                    status[class_label] = f1
+                pbar.set_postfix(status)
                 pbar.update()
     
     #calculate and print out accuracy

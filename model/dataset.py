@@ -8,8 +8,28 @@ import numpy as np
 
 from config import DatasetTypes
 
-def accuracy_metric(predictions, labels):
-    predicted_classes = torch.argmax(predictions, dim=-1)
+# def f1_metric(predictions, labels):
+#     classes = []
+#     for type in DatasetTypes:
+#         classes.append(type.name)
+#     num_classes = len(classes)
+
+#     predicted_classes = torch.argmax(predictions, dim=-1)
+#     confusion_matrix = np.zeros((num_classes, num_classes))
+
+#     for predicted_class, label in zip(predicted_classes, labels):
+#         confusion_matrix[predicted_class, label] += 1
+    
+#     for idx in range(num_classes):
+#         true_pos = confusion_matrix[idx, idx]
+#         total_predicted_pos = np.sum(confusion_matrix[idx, :])
+#         total_labeled_pos = np.sum(confusion_matrix[:, idx])
+#         precision = true_pos / total_predicted_pos
+#         recall = true_pos / total_labeled_pos
+#         f1 = 2 * precision * recall / (precision + recall)
+
+
+def accuracy_metric(predicted_classes, labels):
     correct_predictions = (predicted_classes == labels).sum().item()
     
     return correct_predictions, labels.size(0)
@@ -27,7 +47,8 @@ def per_class_accuracy_metric(predictions, labels):
             accuracies.append((accuracy_metric(prediction_tensor, label_tensor)))
         else:
             accuracies.append((0, 0)) #empty case
-    return accuracies        
+    return accuracies       
+ 
 def sort_images(predictions, labels):
     # sorted_sets = [[] for i in range(7)] #init 7 sublists for each data class
     sorted_predictions = [[] for i in range(7)]

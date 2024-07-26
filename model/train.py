@@ -27,7 +27,10 @@ def train_one_epoch(epoch, model, train_loader, optimizer, criterion, device: st
             batch_outputs = model(batch_images).squeeze()
 
             # Calculate accuracy statistics batch_out
-            correct, total += accuracy_metric(batch_outputs, batch_labels)
+            predicted_classes = torch.argmax(batch_outputs, axis=1)
+            new_correct, new_total = accuracy_metric(predicted_classes, batch_labels)
+            correct += new_correct
+            total += new_total
 
             # Calculate loss and do backpropagation
             loss = criterion(batch_outputs, batch_labels)
