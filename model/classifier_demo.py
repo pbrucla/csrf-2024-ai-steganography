@@ -59,7 +59,8 @@ def classifer_demo(directories, dataset,model, num_images = 10):
 
         
 
-#Sample run
+
+# Sample run
 if __name__ == "__main__":
     print("Running demo")
 
@@ -74,4 +75,3 @@ if __name__ == "__main__":
     classifer_demo(directories, test_dataset, "model")
 
     print("Demo finished")
-

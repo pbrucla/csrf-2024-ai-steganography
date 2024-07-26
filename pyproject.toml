@@ -16,7 +16,11 @@ torch = [
 torchvision = "^0.18.1"
 tqdm = "^4.66.4"
 matplotlib = "^3.9.1"
+<<<<<<< HEAD
 scikit-learn = "^1.5.1"
+=======
+ruff = "^0.5.4"
+>>>>>>> b354845ce210ce8bc6b022011eece17cd3bca946
 
 [build-system]
 requires = ["poetry-core"]
