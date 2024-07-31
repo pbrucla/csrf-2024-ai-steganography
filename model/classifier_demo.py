@@ -7,7 +7,7 @@ from main import test_dataset
 # delete when done (all imports below)
 from dataset import Data
 import config
-from enum_utils import enum_names_to_values
+from config import enum_names_to_values
 
 
 def classifer_demo(directories, dataset,model, num_images = 10):

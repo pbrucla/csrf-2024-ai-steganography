@@ -21,12 +21,8 @@ from dataclasses import dataclass
 from config import DatasetTypes
 from config import enum_names_to_values
 
-<<<<<<< HEAD
-from enum_utils import enum_names_to_values
-=======
 # for lr scheduler
 from torch.optim.lr_scheduler import StepLR
->>>>>>> b354845ce210ce8bc6b022011eece17cd3bca946
 
 
 @dataclass
@@ -41,6 +37,8 @@ class TrainingConfig:
     dataset_types: tuple[str, ...] = ("CLEAN", "LSB")
     step_size: int = 30
     gamma: float = 0.9
+    down_sample_size_train: int | None = None
+    down_sample_size_test: int | None = None
 
 
 def parse_args():
@@ -147,14 +145,14 @@ def train_model(config, plot_data=False):
         converted_dataset_types,
         filepath=os.path.join("data", "train"),
         mode="train",
-        down_sample_size=6000
+        down_sample_size=config.down_sample_size_train
     )
     test_dataset = Data(
         config.extract_lsb,
         converted_dataset_types,
         filepath=os.path.join("data", "test"),
         mode="test",
-        down_sample_size=3000
+        down_sample_size=config.down_sample_size_test
     )
 
     print("Creating DataLoaders")
@@ -202,7 +200,7 @@ def train_model(config, plot_data=False):
             epoch, model, train_loader, optimizer, criterion, config.device
         ))
         unroll(model, optimizer, config.learning_rate)
-        test_one_epoch(model, test_loader, config.device, test_dataset.class_labels)
+        test_statistics = test_one_epoch(model, test_loader, config.device, test_dataset.class_labels)
         scheduler.step()
         loss_values.append(data_storage[epoch][0])
         accu_values.append(data_storage[epoch][1])
@@ -224,7 +222,7 @@ def train_model(config, plot_data=False):
 
         plt.show()
 
-    return accu_values
+    return test_statistics, train_dataset.class_labels
 
 
 if __name__ == "__main__":
