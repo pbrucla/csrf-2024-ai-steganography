@@ -117,6 +117,7 @@ class Data(Dataset):
         mode,
         color_channel="rgb",
         down_sample_size: None | int = None,
+        image_size = 256
     ):
         mode = mode.lower()
         color_channel = color_channel.upper()
@@ -184,7 +185,7 @@ class Data(Dataset):
 
         self.transform = v2.Compose(
             [
-                resize_images((128, 128)),
+                resize_images((image_size, image_size)),
                 v2.ToImage(),  # does not scale values
                 extract_lsb_transform() if self.extract_lsb else lambda x: x,
                 v2.ToDtype(

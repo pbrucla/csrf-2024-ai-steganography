@@ -3,38 +3,47 @@ import torch
 import matplotlib.pyplot as plt
 from display_images import load_random_images
 import re
-from main import test_dataset
 # delete when done (all imports below)
 from dataset import Data
 import config
+<<<<<<< HEAD
+from config import enum_names_to_values, DatasetTypes
+from model import ModelTypes, get_model
+
+# note to future self, work on importing the model to test it out
+=======
 from config import enum_names_to_values
+>>>>>>> f94a04aab762f121c1b8546b67594660ab934f14
 
 
-def classifer_demo(directories, dataset,model, num_images = 10):
+def classifer_demo(directories, dataset, model, num_images = 10):
     # select 10 random images from each label
     # gather predictions from model
     # plot accuracy for each label
+    # labels are ['clean', 'DCT', 'FFT', 'LSB', 'PVD', 'SSB4', 'SSBN']
 
     print("running")
-    print(dataset.class_labels)
-    # just so i can see what they are
 
     labels = []
     accuracies = []
 
+    print("hit directories loop")
+
     for directory in directories:
 
-        true_label = "os.path.__"
-        labels.append(true_label)
         # collect labels from directory name and append to labels
+        true_label = path_to_label(directory)[0]
+        print("True label is " + true_label)
+        labels.append(true_label)
+
+        print("labelling done")
 
         images = load_random_images(directory, num_images)
-
-        predictions = model(images).squeeze()
+        predictions = model(images).squeeze() 
         
         num_correct = 0
         for item in predictions:
-        # caclulate accuracy
+            # caclulate accuracy
             predicted_label = labels[torch.argmax(item)]
             if predicted_label==true_label:
                 num_correct += 1
@@ -55,23 +64,38 @@ def classifer_demo(directories, dataset,model, num_images = 10):
 
     plt.show()
 
-    
+def path_to_label(path):
+    pathstr = str(path)
+    pattern = r"data/(test|train|val)/|Test/|Train/|Val/"
+    subsitution = ""
 
+    label = re.sub(pattern, subsitution, pathstr)
+
+    if label == "clean":
+        return "Clean",
+
+    return label
         
-
 
 # Sample run
 if __name__ == "__main__":
     print("Running demo")
 
-    directories = ["hi"]
+    directories = ["data/test/cleanTest/", "data/test/DCTTest/"]
 
     # delete when done start
-    converted_dataset_types = enum_names_to_values(config.dataset_types)
+    dataset_types = [DatasetTypes.CLEAN, DatasetTypes.DCT, DatasetTypes.FFT, DatasetTypes.LSB, DatasetTypes.PVD, DatasetTypes.SSB4, DatasetTypes.SSBN]
 
-    test_dataset = Data(config.extract_lsb, converted_dataset_types, filepath=os.path.join("data", "test"), mode="test")
+    test_dataset = Data(
+        False, 
+        dataset_types, 
+        filepath=os.path.join("data", "test"), 
+        mode="test"
+    )
     # delete when done end
 
-    classifer_demo(directories, test_dataset, "model")
+    model = get_model(ModelTypes.EfficientNet, 2)
+
+    classifer_demo(directories, test_dataset, model)
 
     print("Demo finished")
