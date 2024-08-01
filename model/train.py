@@ -5,12 +5,13 @@ import torchvision
 import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
+from sklearn.metrics import f1_score
 
 from dataset import accuracy_metric
 
 
 def train_one_epoch(
-    epoch, model, train_loader, optimizer, criterion, device: str
+    epoch, model, train_loader, optimizer, criterion, device: str, class_labels
 ) -> None:
     # Set model to training model
     model.train()
@@ -29,17 +30,18 @@ def train_one_epoch(
             batch_outputs = model(batch_images).squeeze()
 
             # Calculate accuracy statistics batch_out
-<<<<<<< HEAD
             predicted_classes = torch.argmax(batch_outputs, axis=1)
             new_correct, new_total = accuracy_metric(predicted_classes, batch_labels)
             correct += new_correct
             total += new_total
-=======
-            batch_correct, batch_total = accuracy_metric(batch_outputs, batch_labels)
 
-            correct += batch_correct
-            total += batch_total
->>>>>>> b354845ce210ce8bc6b022011eece17cd3bca946
+            f1_scores = f1_score(batch_labels, predicted_classes, average=None)
+
+            status = {"acc": f"{round(100 * correct / total, 3):.2f}%"}
+            for class_label, f1 in zip(class_labels, f1_scores):
+                status[class_label] = f1
+            pbar.set_postfix(status)
+            pbar.update()
 
             # Calculate loss and do backpropagation
             loss = criterion(batch_outputs, batch_labels)
@@ -49,16 +51,17 @@ def train_one_epoch(
             optimizer.step()
             optimizer.zero_grad()
 
-            pbar.set_postfix(
-                {
-                    "loss": f"{loss.item():.4f}",
-                    "acc": f"{round(100 * correct / total, 3):.2f}%",
-                }
-            )
+            
+            
+            status = {
+                "loss": f"{loss.item():.4f}",
+                "acc": f"{round(100 * correct / total, 3):.2f}%",
+            }
+            pbar.set_postfix(status)
             pbar.update()
 
     print(f"Training loss:  {round(loss.item(), 3)}")
     accuracy = round(100 * correct / total, 3)
     print(f"Training accuracy: {accuracy}%")
-    data_baggage = [round(loss.item(), 3), accuracy]
+    data_baggage = [round(loss.item(), 3), accuracy, f1_scores]
     return data_baggage

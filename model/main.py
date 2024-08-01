@@ -16,17 +16,11 @@ from model import get_model, get_optimizer, freeze_model, unroll
 
 # import ModelTypes enum from model
 from model import ModelTypes
-
 from dataclasses import dataclass
 from config import DatasetTypes
 from config import enum_names_to_values
-
-<<<<<<< HEAD
-from enum_utils import enum_names_to_values
-=======
-# for lr scheduler
 from torch.optim.lr_scheduler import StepLR
->>>>>>> b354845ce210ce8bc6b022011eece17cd3bca946
+
 
 
 @dataclass
@@ -34,7 +28,7 @@ class TrainingConfig:
     epochs: int = 2
     learning_rate: float = 0.001
     model_type: ModelTypes = ModelTypes.EfficientNet
-    device: str = "default"  # if default"cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+    device: str = "default"
     transfer_learning: bool = True
     extract_lsb: bool = False
     batch_size: int = 256
@@ -55,7 +49,7 @@ def parse_args():
         "--model-type",
         type=int,
         default=ModelTypes.EfficientNet,
-        help="Model type: EfficientNet(1) or ResNet(2)",
+        help="Model type: EfficientNet(1) or ResNet(2) or SWIN(3) or MobileNet(4)",
     )
     parser.add_argument(
         "--device", type=str, default="default", help="Device type: cpu, cuda, or mps"
@@ -90,7 +84,7 @@ def parse_args():
 def get_device(device_argument):
     # if default set automatically
     if device_argument == "default":
-        if torch.cuda.is_available:
+        if torch.cuda.is_available():
             return "cuda"
         elif torch.backends.mps.is_available():
             return "mps"
@@ -120,6 +114,8 @@ def get_config():
     assert (
         args.model_type == ModelTypes.EfficientNet
         or args.model_type == ModelTypes.ResNet
+        or args.model_type == ModelTypes.SWIN
+        or args.model_type == ModelTypes.MobileNet
     ), "Model type must either be EfficientNet(1) or ResNet(2)!"
 
     return TrainingConfig(
@@ -189,23 +185,26 @@ def train_model(config, plot_data=False):
         ]).to(config.device)
     )
     scheduler = StepLR(optimizer, config.step_size, config.gamma)
+    class_labels = train_dataset.class_labels
 
     # train model for x epoches here (and run testing)model =
     print("Starting model")
     data_storage = []
     loss_values = []
     accu_values = []
+    f1_scores = [] # list of lists (one f1 score per class)
     epoch_array = []
 
     for epoch in range(config.epochs):
         data_storage.append(train_one_epoch(
-            epoch, model, train_loader, optimizer, criterion, config.device
+            epoch, model, train_loader, optimizer, criterion, config.device, class_labels
         ))
         unroll(model, optimizer, config.learning_rate)
-        test_one_epoch(model, test_loader, config.device, test_dataset.class_labels)
+        test_one_epoch(model, test_loader, config.device, test_dataset.class_labels, class_labels)
         scheduler.step()
         loss_values.append(data_storage[epoch][0])
         accu_values.append(data_storage[epoch][1])
+        f1_scores.append(data_storage[epoch][2])
         epoch_array.append(epoch)
 
     if plot_data:

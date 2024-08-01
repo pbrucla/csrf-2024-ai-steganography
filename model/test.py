@@ -11,14 +11,9 @@ from dataset import accuracy_metric
 
 # Write the test function here!
 
-<<<<<<< HEAD
-def test_one_epoch(model, test_loader, device : str, class_labels):
-    #counters for both correct and total predictions
-=======
 
-def test_one_epoch(model, test_loader, device: str):
+def test_one_epoch(model, test_loader, device: str, class_labels):
     # counters for both correct and total predictions
->>>>>>> b354845ce210ce8bc6b022011eece17cd3bca946
     correct = 0
     total = 0
     with torch.no_grad():  # does not calculate gradients for performance optimization (does not store gradient graphs)
@@ -32,23 +27,15 @@ def test_one_epoch(model, test_loader, device: str):
                 )
                 batch_outputs = F.sigmoid(model(batch_inputs)).squeeze()
 
-<<<<<<< HEAD
                 predicted_classes = torch.argmax(batch_outputs, axis=1)
                 new_correct, new_total = accuracy_metric(predicted_classes, batch_labels)
                 correct += new_correct
                 total += new_total
                 f1_scores = f1_score(batch_labels, predicted_classes, average=None)
-=======
-                batch_correct, batch_total = accuracy_metric(
-                    batch_outputs, batch_labels
-                )
-
-                correct += batch_correct
-                total += batch_total
->>>>>>> b354845ce210ce8bc6b022011eece17cd3bca946
 
                 status = {"acc": f"{round(100 * correct / total, 3):.2f}%"}
                 for class_label, f1 in zip(class_labels, f1_scores):
+                    # idk if test_loader. is correct
                     status[class_label] = f1
                 pbar.set_postfix(status)
                 pbar.update()

@@ -9,7 +9,6 @@ import numpy as np
 
 from config import DatasetTypes
 
-<<<<<<< HEAD
 # def f1_metric(predictions, labels):
 #     classes = []
 #     for type in DatasetTypes:
@@ -32,11 +31,6 @@ from config import DatasetTypes
 
 
 def accuracy_metric(predicted_classes, labels):
-=======
-
-def accuracy_metric(predictions, labels):
-    predicted_classes = torch.argmax(predictions, dim=-1)
->>>>>>> b354845ce210ce8bc6b022011eece17cd3bca946
     correct_predictions = (predicted_classes == labels).sum().item()
 
     return correct_predictions, labels.size(0)
@@ -54,16 +48,9 @@ def per_class_accuracy_metric(predictions, labels):
             label_tensor = torch.tensor(label)
             accuracies.append((accuracy_metric(prediction_tensor, label_tensor)))
         else:
-<<<<<<< HEAD
             accuracies.append((0, 0)) #empty case
     return accuracies       
  
-=======
-            accuracies.append((0, 0))  # empty case
-    return accuracies
-
-
->>>>>>> b354845ce210ce8bc6b022011eece17cd3bca946
 def sort_images(predictions, labels):
     # sorted_sets = [[] for i in range(7)] #init 7 sublists for each data class
     sorted_predictions = [[] for i in range(7)]
@@ -130,6 +117,7 @@ class Data(Dataset):
         mode,
         color_channel="rgb",
         down_sample_size: None | int = None,
+        image_size = 256
     ):
         mode = mode.lower()
         color_channel = color_channel.upper()
@@ -197,7 +185,7 @@ class Data(Dataset):
 
         self.transform = v2.Compose(
             [
-                resize_images((128, 128)),
+                resize_images((image_size, image_size)),
                 v2.ToImage(),  # does not scale values
                 extract_lsb_transform() if self.extract_lsb else lambda x: x,
                 v2.ToDtype(
