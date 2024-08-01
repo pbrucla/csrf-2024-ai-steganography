@@ -34,17 +34,6 @@ def train_one_epoch(
             new_correct, new_total = accuracy_metric(predicted_classes, batch_labels)
             correct += new_correct
             total += new_total
-<<<<<<< HEAD
-
-            f1_scores = f1_score(batch_labels, predicted_classes, average=None)
-
-            status = {"acc": f"{round(100 * correct / total, 3):.2f}%"}
-            for class_label, f1 in zip(class_labels, f1_scores):
-                status[class_label] = f1
-            pbar.set_postfix(status)
-            pbar.update()
-=======
->>>>>>> f94a04aab762f121c1b8546b67594660ab934f14
 
             # Calculate loss and do backpropagation
             loss = criterion(batch_outputs, batch_labels)
@@ -54,7 +43,6 @@ def train_one_epoch(
             optimizer.step()
             optimizer.zero_grad()
 
-            
             
             status = {
                 "loss": f"{loss.item():.4f}",
