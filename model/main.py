@@ -135,26 +135,8 @@ def get_config():
     )
 
 
-def train_model(config, plot_data=False):
+def train_model(config, train_dataset, test_dataset, plot_data=False):
     print("Starting Training")
-
-    # https://pytorch.org/vision/stable/generated/torchvision.datasets.ImageFolder.html
-    print("Creating datasets")
-    converted_dataset_types = enum_names_to_values(config.dataset_types)
-    train_dataset = Data(
-        config.extract_lsb,
-        converted_dataset_types,
-        filepath=os.path.join("data", "train"),
-        mode="train",
-        down_sample_size=config.down_sample_size_train
-    )
-    test_dataset = Data(
-        config.extract_lsb,
-        converted_dataset_types,
-        filepath=os.path.join("data", "test"),
-        mode="test",
-        down_sample_size=config.down_sample_size_test
-    )
 
     print("Creating DataLoaders")
     train_loader = torch.utils.data.DataLoader(
@@ -163,6 +145,7 @@ def train_model(config, plot_data=False):
     test_loader = torch.utils.data.DataLoader(
         test_dataset, batch_size=config.batch_size, shuffle=True
     )
+
 
     # base_image = train_loader[1]
     # print ("prior image", base_image)
@@ -229,6 +212,29 @@ def train_model(config, plot_data=False):
     return test_statistics, train_dataset.class_labels
 
 
+def get_datasets(config):
+        # https://pytorch.org/vision/stable/generated/torchvision.datasets.ImageFolder.html
+    print("Creating datasets")
+    converted_dataset_types = enum_names_to_values(config.dataset_types)
+    train_dataset = Data(
+        config.extract_lsb,
+        converted_dataset_types,
+        filepath=os.path.join("data", "train"),
+        mode="train",
+        down_sample_size=config.down_sample_size_train
+    )
+    test_dataset = Data(
+        config.extract_lsb,
+        converted_dataset_types,
+        filepath=os.path.join("data", "test"),
+        mode="test",
+        down_sample_size=config.down_sample_size_test
+    )
+
+   
+    return train_dataset, test_dataset
+
 if __name__ == "__main__":
     config = get_config()
-    train_model(config)
+    train_dataset, test_dataset = get_datasets(config)
+    train_model(config, train_dataset, test_dataset)
