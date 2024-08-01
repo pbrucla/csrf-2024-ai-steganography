@@ -121,9 +121,20 @@ if __name__ == "__main__":
         transfer_learning=True,
         extract_lsb=False,
         batch_size=256,
-        dataset_types=("LSB", "PVD", "Hamming_codes_binary"),
+        dataset_types=("LSB", "PVD"),
         down_sample_size_train= None,
         down_sample_size_test= None
     )
 
-    get_custom_dataset(config)
+    val_dataset = CustomData(
+        config.extract_lsb,
+        config.dataset_types,
+        mode="val",
+        down_sample_size=config.down_sample_size_test
+    )
+
+    train_dataset, test_dataset = get_custom_dataset(config)
+    print(train_dataset.dataset_sizes)
+    print(test_dataset.dataset_sizes)
+    print(val_dataset.dataset_sizes)
+
