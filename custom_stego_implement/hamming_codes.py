@@ -22,7 +22,7 @@
 
 
 # Matrix Embedding using binary Hamming codes.
-EXTRACT = False
+EXTRACT = True
 
 import sys
 import random
@@ -236,7 +236,7 @@ if __name__ == "__main__":
     imageio.imsave(OutputImage, stego)
     print(f"hid {textFile} in {OutputImage} from {InputImage}")
     if(EXTRACT):
-        stego = imageio.imread("stego.png")
+        stego = imageio.imread(sys.argv[3])
         extracted_message = hc.extract(stego[:,:,0])
         print("Extracted message:", extracted_message.decode())
         
