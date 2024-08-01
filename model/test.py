@@ -11,11 +11,17 @@ from dataset import accuracy_metric
 
 # Write the test function here!
 
+<<<<<<< HEAD
 
 def test_one_epoch(model, test_loader, device: str, class_labels):
     # counters for both correct and total predictions
+=======
+def test_one_epoch(model, test_loader, device : str, class_labels):
+    #counters for both correct and total predictions
+>>>>>>> f94a04aab762f121c1b8546b67594660ab934f14
     correct = 0
     total = 0
+    all_f1_scores = []
     with torch.no_grad():  # does not calculate gradients for performance optimization (does not store gradient graphs)
         model.eval()  # puts into an evaluation state (drops droput layer and changes normalization layer)
 
@@ -31,7 +37,13 @@ def test_one_epoch(model, test_loader, device: str, class_labels):
                 new_correct, new_total = accuracy_metric(predicted_classes, batch_labels)
                 correct += new_correct
                 total += new_total
+<<<<<<< HEAD
                 f1_scores = f1_score(batch_labels, predicted_classes, average=None)
+=======
+                f1_scores = f1_score(batch_labels.cpu(), predicted_classes.cpu(), average=None)
+
+                all_f1_scores.append(f1_scores)
+>>>>>>> f94a04aab762f121c1b8546b67594660ab934f14
 
                 status = {"acc": f"{round(100 * correct / total, 3):.2f}%"}
                 for class_label, f1 in zip(class_labels, f1_scores):
@@ -43,3 +55,7 @@ def test_one_epoch(model, test_loader, device: str, class_labels):
     # calculate and print out accuracy
     accuracy = round(100 * correct / total, 3)
     print(f"Accuracy at end of epoch: {accuracy}%")
+
+    average_f1 = sum(all_f1_scores) / len(all_f1_scores) 
+
+    return accuracy, average_f1
