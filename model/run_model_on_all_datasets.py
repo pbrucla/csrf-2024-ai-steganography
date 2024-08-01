@@ -31,8 +31,8 @@ if __name__ == "__main__":
             extract_lsb=False,
             batch_size=256,
             dataset_types=("CLEAN", i),
-            down_sample_size_train= 1000,
-            down_sample_size_test= 200
+            down_sample_size_train= None,
+            down_sample_size_test= None
         )
         test_statistics, class_names = train_model(config)
         stego_accuracy.append(test_statistics[0])

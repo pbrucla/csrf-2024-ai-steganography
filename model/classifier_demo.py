@@ -6,15 +6,8 @@ import re
 # delete when done (all imports below)
 from dataset import Data
 import config
-<<<<<<< HEAD
 from config import enum_names_to_values, DatasetTypes
 from model import ModelTypes, get_model
-
-# note to future self, work on importing the model to test it out
-=======
-from config import enum_names_to_values
->>>>>>> f94a04aab762f121c1b8546b67594660ab934f14
-
 
 def classifer_demo(directories, dataset, model, num_images = 10):
     # select 10 random images from each label
