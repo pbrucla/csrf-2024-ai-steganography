@@ -11,7 +11,7 @@ from enum import Enum
 
 class ModelTypes(Enum):
     EfficientNet = 1
-    ResNet = 2
+
     SWIN = 3
     MobileNet = 4
 
@@ -25,14 +25,6 @@ def get_model(model_type: ModelTypes, num_classes: int) -> nn.Module:
             model.classifier = nn.Sequential(
                 nn.Dropout(0.2, inplace=True),
                 nn.Linear(in_features=1280, out_features=num_classes),
-            )
-
-        case ModelTypes.ResNet:
-            model = torchvision.models.resnet18(
-                weights="ResNet18_Weights.IMAGENET1K_V1"
-            )
-            model.fc = nn.Sequential(
-                nn.Linear(in_features=512, out_features=num_classes, bias=True),
             )
 
         case ModelTypes.SWIN:
