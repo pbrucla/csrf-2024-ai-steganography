@@ -9,10 +9,13 @@ import config
 from config import enum_names_to_values, DatasetTypes
 from model import ModelTypes, get_model
 
+<<<<<<< HEAD
 # note to future self, work on importing the model to test it out
 from config import enum_names_to_values
 
 
+=======
+>>>>>>> 07f9da949b8f1b060bfc6e3d27a5d21748ed298b
 def classifer_demo(directories, dataset, model, num_images = 10):
     # select 10 random images from each label
     # gather predictions from model
