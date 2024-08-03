@@ -19,14 +19,9 @@ from model import ModelTypes
 from dataclasses import dataclass
 from config import DatasetTypes
 from config import enum_names_to_values
-<<<<<<< HEAD
-from torch.optim.lr_scheduler import StepLR
-
-=======
 
 # for lr scheduler
 from torch.optim.lr_scheduler import StepLR
->>>>>>> f94a04aab762f121c1b8546b67594660ab934f14
 
 
 @dataclass
@@ -208,11 +203,7 @@ def train_model(config, plot_data=False):
             epoch, model, train_loader, optimizer, criterion, config.device, class_labels
         ))
         unroll(model, optimizer, config.learning_rate)
-<<<<<<< HEAD
-        test_one_epoch(model, test_loader, config.device, test_dataset.class_labels, class_labels)
-=======
         test_statistics = test_one_epoch(model, test_loader, config.device, test_dataset.class_labels)
->>>>>>> f94a04aab762f121c1b8546b67594660ab934f14
         scheduler.step()
         loss_values.append(data_storage[epoch][0])
         accu_values.append(data_storage[epoch][1])

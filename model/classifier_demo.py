@@ -6,14 +6,11 @@ import re
 # delete when done (all imports below)
 from dataset import Data
 import config
-<<<<<<< HEAD
 from config import enum_names_to_values, DatasetTypes
 from model import ModelTypes, get_model
 
 # note to future self, work on importing the model to test it out
-=======
 from config import enum_names_to_values
->>>>>>> f94a04aab762f121c1b8546b67594660ab934f14
 
 
 def classifer_demo(directories, dataset, model, num_images = 10):
@@ -22,18 +19,18 @@ def classifer_demo(directories, dataset, model, num_images = 10):
     # plot accuracy for each label
     # labels are ['clean', 'DCT', 'FFT', 'LSB', 'PVD', 'SSB4', 'SSBN']
 
-    print("running")
+    # print("running")
 
     labels = []
     accuracies = []
 
-    print("hit directories loop")
+    # print("hit directories loop")
 
     for directory in directories:
 
         # collect labels from directory name and append to labels
         true_label = path_to_label(directory)[0]
-        print("True label is " + true_label)
+        # print("True label is " + true_label)
         labels.append(true_label)
 
         print("labelling done")
@@ -93,6 +90,8 @@ if __name__ == "__main__":
         mode="test"
     )
     # delete when done end
+
+    # print("test_dataset.labels is " + str(test_dataset.labels))
 
     model = get_model(ModelTypes.EfficientNet, 2)
 

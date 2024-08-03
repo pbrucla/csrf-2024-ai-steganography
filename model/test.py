@@ -11,14 +11,8 @@ from dataset import accuracy_metric
 
 # Write the test function here!
 
-<<<<<<< HEAD
-
-def test_one_epoch(model, test_loader, device: str, class_labels):
-    # counters for both correct and total predictions
-=======
 def test_one_epoch(model, test_loader, device : str, class_labels):
     #counters for both correct and total predictions
->>>>>>> f94a04aab762f121c1b8546b67594660ab934f14
     correct = 0
     total = 0
     all_f1_scores = []
@@ -37,13 +31,9 @@ def test_one_epoch(model, test_loader, device : str, class_labels):
                 new_correct, new_total = accuracy_metric(predicted_classes, batch_labels)
                 correct += new_correct
                 total += new_total
-<<<<<<< HEAD
-                f1_scores = f1_score(batch_labels, predicted_classes, average=None)
-=======
                 f1_scores = f1_score(batch_labels.cpu(), predicted_classes.cpu(), average=None)
 
                 all_f1_scores.append(f1_scores)
->>>>>>> f94a04aab762f121c1b8546b67594660ab934f14
 
                 status = {"acc": f"{round(100 * correct / total, 3):.2f}%"}
                 for class_label, f1 in zip(class_labels, f1_scores):
