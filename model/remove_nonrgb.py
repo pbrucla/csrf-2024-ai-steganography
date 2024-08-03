@@ -6,8 +6,9 @@ def main():
     clean_train_filepath = os.path.join("data", "train", "cleanTrain")
     clean_test_filepath = os.path.join("data", "test", "cleanTest")
 
-    remove_nonrgb(clean_train_filepath)
+    # remove_nonrgb(clean_train_filepath)
     # remove_nonrgb(clean_test_filepath)
+    remove_nonrgb()
 
 
 def remove_nonrgb(filepath):

@@ -8,16 +8,17 @@ from sklearn.model_selection import GridSearchCV
 from dataset import Data
 from model import get_model, get_optimizer, freeze_model, unroll, ModelTypes, wrapper
 import config
+import torch
 from config import enum_names_to_values
 from main import TrainingConfig
 
-
-def get_efficient_hyperparameters(model_type, num_classes, val_dataset):
+def get_efficient_hyperparameters(model_type, num_classes, X, y):
 
     print("entered function")
 
     param_grid = {
-        "lr": [0.001, 0.0001, 0.00001],
+        # later include more lr and more epochs (taking them out so faster testing)
+        "lr": [0.001],
         "max_epochs": [10, 12],
     }
     # extract_lsb": []  # implemet this after we figure everything else
@@ -33,7 +34,7 @@ def get_efficient_hyperparameters(model_type, num_classes, val_dataset):
     #print("val_dataset.labels:")
     #print(val_dataset.labels)  
 
-    clf.fit(val_dataset, val_dataset.labels)
+    clf.fit(X, y)
     print("fit")
 
     params = clf.best_params_
@@ -53,10 +54,27 @@ if __name__ == "__main__":
         enum_names_to_values(TrainingConfig.dataset_types),
         filepath=os.path.join("data", "val"),
         mode="val",
+        down_sample_size=12,
     )
 
-    get_efficient_hyperparameters(ModelTypes.EfficientNet, 7, validation_dataset) 
+    def is_rgb(image):
+        return image.shape[0] == 3
+
+    filtered_dataset = [(image, label) for image, label in validation_dataset if is_rgb(image)]
+    images, labels = zip(*filtered_dataset)
+
+    X = torch.stack(images)
+    y = torch.tensor(labels)
+
+    get_efficient_hyperparameters(ModelTypes.EfficientNet, 7, X, y) 
     # Testing 1 as the first parameter to correspond to EfficientNet -- THIS IS THE PLAN
+
+    #print(len(validation_dataset))
+    #print(len(validation_dataset.labels))
+    # print("validation_dataset[1]")
+    #print(validation_dataset[0])
+    #print("labels")
+    #print(validation_dataset.labels[0])
 
     print("end")
 
