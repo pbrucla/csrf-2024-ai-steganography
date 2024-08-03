@@ -7,7 +7,7 @@ import torch.nn.functional as F
 
 from enum import Enum
 
-# from sklearn import NeuralNetBinaryClassifier
+from skorch import NeuralNetClassifier
 
 class ModelTypes(Enum):
     EfficientNet = 1
@@ -83,15 +83,15 @@ def get_optimizer(model, base_lr, classifier_lr, unfrozen_layers=[0, 1, 2, 3]):
     return optimizer
 
 
-# def wrapper(model):
-#     wrapped_model = NeuralNetBinaryClassifier(
-#         model,
-#         criterion=nn.CrossEntropyLoss,
-#         optimizer=torch.optim.Adam,
-#         # optimizer = torch.optim.AdamW(parameter_lrs)
-#         lr=0.001,
-#         max_epochs=9,
-#         #batch_size=10
-#         verbose=True
-#     )
-#     return wrapped_model
+def wrapper(model):
+    wrapped_model = NeuralNetClassifier(
+        model,
+        criterion=nn.CrossEntropyLoss,
+        optimizer=torch.optim.Adam,
+        # optimizer = torch.optim.AdamW(parameter_lrs)
+        lr=0.001,
+        max_epochs=9,
+        #batch_size=10
+        verbose=True
+    )
+    return wrapped_model

@@ -18,8 +18,8 @@ def get_efficient_hyperparameters(model_type, num_classes, X, y):
 
     param_grid = {
         # later include more lr and more epochs (taking them out so faster testing)
-        "lr": [0.001],
-        "max_epochs": [10, 12],
+        "lr": [0.001, 0.0001, 0.00001],
+        "max_epochs": [8, 10, 12, 14],
     }
     # extract_lsb": []  # implemet this after we figure everything else
     print("param_grid")
@@ -28,11 +28,8 @@ def get_efficient_hyperparameters(model_type, num_classes, X, y):
     model = wrapper(get_model(model_type, num_classes))
     print("model and wrapped")
 
-    clf = GridSearchCV(model, param_grid, cv=5, scoring="accuracy", verbose=3)
+    clf = GridSearchCV(model, param_grid, cv=5, scoring="accuracy", verbose=3, error_score='raise')
     print("clf")
-
-    #print("val_dataset.labels:")
-    #print(val_dataset.labels)  
 
     clf.fit(X, y)
     print("fit")
@@ -57,24 +54,20 @@ if __name__ == "__main__":
         down_sample_size=12,
     )
 
+    print("class labels are " + str(validation_dataset.class_labels))
+
     def is_rgb(image):
         return image.shape[0] == 3
 
+    # filtering out not-rgb
     filtered_dataset = [(image, label) for image, label in validation_dataset if is_rgb(image)]
     images, labels = zip(*filtered_dataset)
 
     X = torch.stack(images)
     y = torch.tensor(labels)
 
-    get_efficient_hyperparameters(ModelTypes.EfficientNet, 7, X, y) 
+    get_efficient_hyperparameters(ModelTypes.EfficientNet, 2, X, y) 
     # Testing 1 as the first parameter to correspond to EfficientNet -- THIS IS THE PLAN
-
-    #print(len(validation_dataset))
-    #print(len(validation_dataset.labels))
-    # print("validation_dataset[1]")
-    #print(validation_dataset[0])
-    #print("labels")
-    #print(validation_dataset.labels[0])
 
     print("end")
 
