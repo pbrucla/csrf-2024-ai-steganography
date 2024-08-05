@@ -128,7 +128,11 @@ class HC:
                     add = -1
                 elif v == self.min_value:
                     add = 1
-                s[j:j+self.block_len][position[0]] += add
+                if(add == 1):
+                    s[j:j+self.block_len][position[0]] += 1
+                else:
+                    s[j:j+self.block_len][position[0]] -= 1
+
 
             i += self.msg_len
             j += self.block_len
