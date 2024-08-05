@@ -140,7 +140,7 @@ def main():
             stego_image = pvd_hide_rgb(image, secret_data)
 
             # Save the stego image
-            stego_image_path = dest_path
+            stego_image_path = dest_path[:-4] + '.png'
             cv2.imwrite(stego_image_path, stego_image)
             print(f"written {message_length} bytes in {stego_image_path} from {image_path}, number: {i}")
 
