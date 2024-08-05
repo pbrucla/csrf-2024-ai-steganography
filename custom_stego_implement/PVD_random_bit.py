@@ -23,11 +23,11 @@ def f(p1, p2, m):
     floor = math.floor(m/2.0)
     d = abs(int(p1) - int(p2))
     if (d%2) == 1:
-        g1 = p1-ceiling
-        g2 = p2+floor
+        g1 = p1+np.array(-ceiling).astype('uint8')
+        g2 = p2+np.array(floor).astype('uint8')
     else:
-        g1 = p1-floor
-        g2 = p2+ceiling
+        g1 = p1+np.array(-floor).astype('uint8')
+        g2 = p2+np.array(ceiling).astype('uint8')
     return g1, g2
 
 
