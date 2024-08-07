@@ -11,7 +11,6 @@ from skorch import NeuralNetClassifier
 
 class ModelTypes(Enum):
     EfficientNet = 1
-
     SWIN = 3
     MobileNet = 4
 

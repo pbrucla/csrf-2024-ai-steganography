@@ -19,6 +19,8 @@ ENCODE = True
 EXTRACT = False
 
 def f(p1, p2, m):
+    p1 = p1.astype(np.int64)
+    p2 = p2.astype(np.int64)
     ceiling = math.ceil(m/2.0)
     floor = math.floor(m/2.0)
     d = abs(int(p1) - int(p2))
@@ -61,7 +63,7 @@ def pvd_hide_rgb(image : str, secret_data: str):
                     else:
                         dprime = -(lowers[k]+b)
                     test = f(p1, p2, uppers[k] - d)
-                    if(test[0] > 255 or test[1] > 255):
+                    if(test[0] > 255 or test[1] > 255 or test[0] < 0 or test[1] < 0):
                         continue
                     data_index += n
                     m = dprime - d
@@ -140,7 +142,7 @@ def main():
             stego_image = pvd_hide_rgb(image, secret_data)
 
             # Save the stego image
-            stego_image_path = dest_path
+            stego_image_path = dest_path[:-4] + '.png'
             cv2.imwrite(stego_image_path, stego_image)
             print(f"written {message_length} bytes in {stego_image_path} from {image_path}, number: {i}")
 

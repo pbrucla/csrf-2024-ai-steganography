@@ -3,6 +3,7 @@ Visualization_Outputs/
 wandb/
 Datasets/cache/
 temp/
+data/CustomStego/
 
 # wp
 *.swp
