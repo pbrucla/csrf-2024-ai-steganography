@@ -35,7 +35,7 @@ def train_one_epoch(
             correct += new_correct
             total += new_total
 
-            f1_scores = f1_score(batch_labels, predicted_classes, average=None)
+            f1_scores = f1_score(batch_labels.cpu(), predicted_classes.cpu(), average=None)
 
             status = {"acc": f"{round(100 * correct / total, 3):.2f}%"}
             for class_label, f1 in zip(class_labels, f1_scores):

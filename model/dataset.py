@@ -6,6 +6,9 @@ from PIL import Image
 
 # for determining which dataset to use as specified by the user
 import numpy as np
+from config import TrainingConfig, enum_names_to_values
+from model import ModelTypes
+
 
 from config import DatasetTypes
 
@@ -211,3 +214,53 @@ class Data(Dataset):
         label = self.labels[idx]
 
         return image, label
+
+
+def get_datasets(config):
+    converted_dataset_types = enum_names_to_values(config.dataset_types)
+    train_dataset = Data(
+        config.extract_lsb,
+        converted_dataset_types,
+        filepath=os.path.join("data", "train"),
+        mode="train",
+        down_sample_size=config.down_sample_size_train
+    )
+    test_dataset = Data(
+        config.extract_lsb,
+        converted_dataset_types,
+        filepath=os.path.join("data", "test"),
+        mode="test",
+        down_sample_size=config.down_sample_size_test
+    )
+   
+    return train_dataset, test_dataset
+
+
+if __name__ == "__main__":
+
+    config = TrainingConfig(
+        epochs=10,
+        learning_rate=1e-3,
+        model_type=ModelTypes.EfficientNet,
+        device= "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu",
+        transfer_learning=True,
+        extract_lsb=False,
+        batch_size=256,
+        dataset_types=("CLEAN", "DCT", "FFT", "LSB", "PVD"),
+        down_sample_size_train= None,
+        down_sample_size_test= None
+    )
+
+    train_dataset, test_dataset = get_datasets(config)
+
+    val_dataset = Data(
+        config.extract_lsb,
+        enum_names_to_values(config.dataset_types),
+        filepath=os.path.join("data", "val"),
+        mode="val",
+        down_sample_size=config.down_sample_size_test
+    )
+
+    print(train_dataset.dataset_sizes)
+    print(test_dataset.dataset_sizes)
+    print(val_dataset.dataset_sizes)

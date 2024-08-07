@@ -5,10 +5,17 @@ import os
 from PIL import Image
 from dataset import resize_images, extract_lsb_transform
 from model import ModelTypes
-from main import TrainingConfig
+from config import TrainingConfig
 
 # for determining which dataset to use as specified by the user
 import numpy as np
+
+def is_color_channel_image(file_path, color_channel):
+    try:
+        with Image.open(file_path) as img:
+            return img.mode == color_channel
+    except IOError:
+        return False
 
 # make a class: Dataloader
 class CustomData(Dataset):
@@ -21,7 +28,7 @@ class CustomData(Dataset):
         filepath = os.path.join("data", "CustomStego"),
         color_channel="rgb",
         down_sample_size: None | int = None,
-        image_size = 256
+        image_size = 128
     ):
         mode = mode.lower()
         color_channel = color_channel.upper()
@@ -41,9 +48,10 @@ class CustomData(Dataset):
         filepaths = []
         self.class_labels = []
 
+
         # file path identification/appendage, filepath contains 7 lists for each set
         for type in dataset_types:
-            path_to_folder = os.path.join(filepath, type + ("" if mode == "train" else "test" if mode == "test" else "Val"))
+            path_to_folder = os.path.join(filepath, type + mode.capitalize())
             self.class_labels.append(type)  # put all in labels
             data_classes_paths = [
                 os.path.join(path_to_folder, file)
@@ -53,6 +61,16 @@ class CustomData(Dataset):
                 data_classes_paths = data_classes_paths[:down_sample_size]
 
             filepaths.append(data_classes_paths)
+
+        # ensure all images have the correct color channel
+        for i in range(len(filepaths) - 1, -1, -1):
+            image_class = filepaths[i]
+            image_class[:] = [img for img in image_class if is_color_channel_image(img, color_channel)]
+
+            if not image_class:
+                filepaths.pop(i)
+                self.class_labels.pop(i)
+
 
         self.all_files = []
         self.dataset_sizes = []
@@ -121,7 +139,7 @@ if __name__ == "__main__":
         transfer_learning=True,
         extract_lsb=False,
         batch_size=256,
-        dataset_types=("LSB", "PVD"),
+        dataset_types=("LSB", "PVD", "clean", "hamming_codes_binary_"),
         down_sample_size_train= None,
         down_sample_size_test= None
     )
