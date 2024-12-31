@@ -28,7 +28,7 @@ def print_dictionary(dict: dict[str, int], root_str: str) -> None:
     print()
 
 
-def print_rgba_values(image_path: str):  # Probably change to show more clearly
+def print_rgba_values(image_path: str): 
     with Image.open(image_path) as img:
         if img.mode == "RGBA":
             red = img.getchannel("R")
@@ -161,16 +161,6 @@ def main():
         ),
         print_dimensions=False,
     )
-
-    # for name, filepaths in datasets.items():
-    #     get_dataset_info(name=name, filepaths=filepaths, print_dimensions=False, print_filetypes=True, print_modes=True)
-
-    # filetypes, modes, dimensions = get_dataset_info(name="Train clean", filepaths=train_clean_filepaths, print_dimensions=False, print_filetypes=True, print_modes=True)
-    # filetypes, modes, dimensions = get_dataset_info(name="Test clean", filepaths=test_clean_filepaths, print_dimensions=False, print_filetypes=True, print_modes=True)
-
-    # print_rgba_values(train_clean_filepaths[0])
-    # print_dimensions_bar_chart(dimensions_dictionary=dimensions, dataset_name="Train clean")
-    # print_dictionary(dimensions, root_str='Train clean dimensions: ')
 
 
 if __name__ == "__main__":

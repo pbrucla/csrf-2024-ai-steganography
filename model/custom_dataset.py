@@ -17,7 +17,6 @@ def is_color_channel_image(file_path, color_channel):
     except IOError:
         return False
 
-# make a class: Dataloader
 class CustomData(Dataset):
     # filepath is the root path for StegoPvd Dataset
     def __init__(
@@ -91,7 +90,6 @@ class CustomData(Dataset):
                 v2.ToDtype(
                     torch.float32
                 ),  # preserves original values, no normalize (scale=false default)
-                # v2.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
             ]
         )
 
@@ -104,9 +102,7 @@ class CustomData(Dataset):
         filepath = self.all_files[idx]
         # find filepath previosuly
         image = Image.open(filepath)  # directly convert to 32-bit float
-
         image = self.transform(image)
-
         # get label
         label = self.labels[idx]
 

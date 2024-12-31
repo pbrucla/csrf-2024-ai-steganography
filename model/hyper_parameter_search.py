@@ -1,8 +1,3 @@
-# Make a function that runs a hyper parameter search by generating some configs that it uses to call train (in main)
-# do grid search
-# hyper parameters - learning rate, dataset type, maybe extract LSB
-# store results in csv
-
 import os
 from sklearn.model_selection import GridSearchCV
 from dataset import Data
@@ -17,11 +12,9 @@ def get_efficient_hyperparameters(model_type, num_classes, X, y):
     print("entered function")
 
     param_grid = {
-        # later include more lr and more epochs (taking them out so faster testing)
         "lr": [0.001, 0.0001, 0.00001],
         "max_epochs": [8, 10, 12, 14],
     }
-    # extract_lsb": []  # implemet this after we figure everything else
     print("param_grid")
 
     # define model here
@@ -42,7 +35,6 @@ def get_efficient_hyperparameters(model_type, num_classes, X, y):
 
 
 
-# Sample run
 if __name__ == "__main__":
     print("start")
 
@@ -67,7 +59,6 @@ if __name__ == "__main__":
     y = torch.tensor(labels)
 
     get_efficient_hyperparameters(ModelTypes.EfficientNet, 2, X, y) 
-    # Testing 1 as the first parameter to correspond to EfficientNet -- THIS IS THE PLAN
 
     print("end")
 

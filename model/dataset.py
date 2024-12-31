@@ -12,27 +12,6 @@ from model import ModelTypes
 
 from config import DatasetTypes
 
-# def f1_metric(predictions, labels):
-#     classes = []
-#     for type in DatasetTypes:
-#         classes.append(type.name)
-#     num_classes = len(classes)
-
-#     predicted_classes = torch.argmax(predictions, dim=-1)
-#     confusion_matrix = np.zeros((num_classes, num_classes))
-
-#     for predicted_class, label in zip(predicted_classes, labels):
-#         confusion_matrix[predicted_class, label] += 1
-    
-#     for idx in range(num_classes):
-#         true_pos = confusion_matrix[idx, idx]
-#         total_predicted_pos = np.sum(confusion_matrix[idx, :])
-#         total_labeled_pos = np.sum(confusion_matrix[:, idx])
-#         precision = true_pos / total_predicted_pos
-#         recall = true_pos / total_labeled_pos
-#         f1 = 2 * precision * recall / (precision + recall)
-
-
 def accuracy_metric(predicted_classes, labels):
     correct_predictions = (predicted_classes == labels).sum().item()
 
@@ -109,9 +88,7 @@ def is_color_channel_image(file_path, color_channel):
         return False
 
 
-# make a class: Dataloader
 class Data(Dataset):
-    # filepath is the root path for StegoPvd Dataset
     def __init__(
         self,
         extract_lsb,
@@ -164,17 +141,6 @@ class Data(Dataset):
 
             filepaths.append(data_classes_paths)
 
-        # ensure all images have the correct color channel
-        # for i in range(len(filepaths) - 1, -1, -1):
-        #     image_class = filepaths[i]
-        #     image_class[:] = [img for img in image_class if is_color_channel_image(img, color_channel)]
-
-        #     if not image_class:
-        #         filepaths.pop(i)
-        #         self.class_labels.pop(i)
-
-        # assert len(self.class_labels) > 1, f"only {self.class_labels[0] if self.class_labels else "no"} class had enough {color_channel} images at least 2 classes are needed to run this script"
-
         self.all_files = []
         self.dataset_sizes = []
         self.labels = []
@@ -194,7 +160,6 @@ class Data(Dataset):
                 v2.ToDtype(
                     torch.float32
                 ),  # preserves original values, no normalize (scale=false default)
-                # v2.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
             ]
         )
 
@@ -207,9 +172,7 @@ class Data(Dataset):
         filepath = self.all_files[idx]
         # find filepath previosuly
         image = Image.open(filepath)  # directly convert to 32-bit float
-
         image = self.transform(image)
-
         # get label
         label = self.labels[idx]
 

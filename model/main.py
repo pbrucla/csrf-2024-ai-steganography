@@ -6,19 +6,16 @@ import torchvision
 import torchvision.transforms as transforms
 import torch.nn as nn
 import torch.nn.functional as F
-from tqdm import tqdm
 
+from tqdm import tqdm
 from dataset import get_datasets
 from train import train_one_epoch
 from test import test_one_epoch
 from model import get_model, get_optimizer, freeze_model, unroll
 from config import get_config
 
-
-
 # for lr scheduler
 from torch.optim.lr_scheduler import StepLR
-
 
 def train_model(config, train_dataset, test_dataset, plot_data=False):
     print("Starting Training")
@@ -31,20 +28,6 @@ def train_model(config, train_dataset, test_dataset, plot_data=False):
         test_dataset, batch_size=config.batch_size, shuffle=True
     )
 
-
-    # base_image = train_loader[1]
-    # print ("prior image", base_image)
-    # check_image = train_loader[1].transform()
-    # print ("\n Changed image: ",check_image)
-
-    # visualize a sample from the train loader
-    # train_iter = iter(train_loader)
-    # batch_images, batch_labels = next(train_iter)
-
-    # image, label = batch_images[0], batch_labels[0]
-    # print(image.shape)
-    # plt.imshow(image.permute(1,2,0))
-    # plt.show()
     print("Creating model")
     # create instance of model here
     model = get_model(config.model_type, len(config.dataset_types)).to(config.device)

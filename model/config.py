@@ -1,5 +1,4 @@
 from enum import IntEnum
-# import ModelTypes enum from model
 from model import ModelTypes
 from dataclasses import dataclass
 import argparse

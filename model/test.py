@@ -9,8 +9,6 @@ from sklearn.metrics import f1_score
 
 from dataset import accuracy_metric
 
-# Write the test function here!
-
 def test_one_epoch(model, test_loader, device : str, class_labels):
     #counters for both correct and total predictions
     correct = 0
@@ -37,7 +35,6 @@ def test_one_epoch(model, test_loader, device : str, class_labels):
 
                 status = {"acc": f"{round(100 * correct / total, 3):.2f}%"}
                 for class_label, f1 in zip(class_labels, f1_scores):
-                    # idk if test_loader. is correct
                     status[class_label] = f1
                 pbar.set_postfix(status)
                 pbar.update()

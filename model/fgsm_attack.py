@@ -35,10 +35,3 @@ def test(model, device, test_loader, epsilon):
         output = model(image)
         
         pass
-
-# criterion = nn.CrossEntropyLoss(
-#         weight=torch.tensor([
-#             sum(train_dataset.dataset_sizes) / i for i in train_dataset.dataset_sizes
-#         ]).to(config.device)
-# )
-

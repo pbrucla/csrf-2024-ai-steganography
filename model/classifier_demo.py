@@ -3,13 +3,11 @@ import torch
 import matplotlib.pyplot as plt
 from display_images import load_random_images
 import re
-# delete when done (all imports below)
 from dataset import Data
 import config
 from config import enum_names_to_values, DatasetTypes
 from model import ModelTypes, get_model
 
-# note to future self, work on importing the model to test it out
 from config import enum_names_to_values
 
 
@@ -17,20 +15,15 @@ def classifer_demo(directories, dataset, model, num_images = 10):
     # select 10 random images from each label
     # gather predictions from model
     # plot accuracy for each label
-    # labels are ['clean', 'DCT', 'FFT', 'LSB', 'PVD', 'SSB4', 'SSBN']
-
-    # print("running")
+    # labels are ['clean', 'DCT', 'FFT', 'LSB', 'PVD']
 
     labels = []
     accuracies = []
-
-    # print("hit directories loop")
 
     for directory in directories:
 
         # collect labels from directory name and append to labels
         true_label = path_to_label(directory)[0]
-        # print("True label is " + true_label)
         labels.append(true_label)
 
         print("labelling done")
@@ -80,7 +73,6 @@ if __name__ == "__main__":
 
     directories = ["data/test/cleanTest/", "data/test/DCTTest/"]
 
-    # delete when done start
     dataset_types = [DatasetTypes.CLEAN, DatasetTypes.DCT, DatasetTypes.FFT, DatasetTypes.LSB, DatasetTypes.PVD, DatasetTypes.SSB4, DatasetTypes.SSBN]
 
     test_dataset = Data(
@@ -89,9 +81,6 @@ if __name__ == "__main__":
         filepath=os.path.join("data", "test"), 
         mode="test"
     )
-    # delete when done end
-
-    # print("test_dataset.labels is " + str(test_dataset.labels))
 
     model = get_model(ModelTypes.EfficientNet, 2)
 

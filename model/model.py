@@ -6,7 +6,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from enum import Enum
-
 from skorch import NeuralNetClassifier
 
 class ModelTypes(Enum):
@@ -77,7 +76,7 @@ def get_optimizer(model, base_lr, classifier_lr, unfrozen_layers=[0, 1, 2, 3]):
     if other_params:
         parameter_lrs.append({"params": other_params, "lr": base_lr})
 
-    # Initialize optimizer?
+    # Initialize optimizer
     optimizer = torch.optim.AdamW(parameter_lrs)
     return optimizer
 
