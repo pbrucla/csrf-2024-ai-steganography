@@ -1,5 +1,3 @@
-# Cyber CSRF / URTC Project 2024 - Stegonagraphic Image Detection + Classification
-
 ## Description
 
 Stegonagraphy is a technique that hides information in images through slight manipulations of pixel values. This project uses convolutional neural networks (CNNS) to detect if steganography is present in an image, and if so, which technique was used. The model can detect four kinds of steganography: Least Significant Bit (LSB), Pixel Value Differencing (PVD), Fast Fourier Transform (FFT), and Discrete Cosine Transform (DCT).
